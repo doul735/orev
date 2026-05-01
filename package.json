@@ -1,9 +1,10 @@
 {
   "name": "orev",
   "version": "0.1.0",
-  "description": "Privacy-gated review and ship workflow suite for AI coding agents",
+  "description": "Privacy-gated review and release workflows for AI coding agents",
   "type": "module",
   "license": "MIT",
+  "author": "CHANG MIN YUN / Pllet Data Inc.",
   "bin": {
     "orev": "dist/cli.js"
   },
@@ -16,18 +17,25 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/plletdata/orev.git"
+    "url": "https://github.com/doul735/orev.git"
   },
   "bugs": {
-    "url": "https://github.com/plletdata/orev/issues"
+    "url": "https://github.com/doul735/orev/issues"
   },
-  "homepage": "https://github.com/plletdata/orev#readme",
+  "homepage": "https://github.com/doul735/orev#readme",
   "keywords": [
+    "ai-coding",
+    "agent-workflow",
     "code-review",
+    "cli",
+    "developer-tools",
+    "quality-gate",
     "privacy-gate",
-    "orev",
+    "release-workflow",
     "ai-review",
-    "security"
+    "security",
+    "ux-review",
+    "workflow-automation"
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json && chmod +x dist/cli.js",
