@@ -52,7 +52,7 @@ Start with:
 /SUX_review parallel code + UX review
 ```
 
-Use `/pd9` for authentication, authorization, payment, billing, encryption, data migration, or infrastructure changes.
+Use `/pd7` for authentication, authorization, payment, billing, encryption, data migration, infrastructure changes, or Cancer-zero releases. `/pd9` is reserved for custom variants.
 
 ## 6. Keep Generated Files Out Of Git
 

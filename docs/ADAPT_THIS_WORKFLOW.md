@@ -48,12 +48,12 @@ Your tiny docs/config changes       -> PD 1
 Your normal feature or bug fix      -> PD 3
 Your cross-file feature work        -> PD 5
 Your release candidate or risky UX  -> PD 7
-Your auth/payment/data/security     -> PD 9
+Your auth/payment/data/security     -> PD 7
 ```
 
 ## Do Not Preserve Blindly
 
-- OMO integration is optional for external users.
+- The exact hosted runtime can change, but PD 5/7 should keep independent reviewer approval rather than same-agent self-review.
 - The exact skill names can change.
 - The exact test/build commands should match your project.
 - The pathology labels are memorable, but every finding still needs concrete evidence.
@@ -61,6 +61,6 @@ Your auth/payment/data/security     -> PD 9
 ## Recommended Rollout
 
 1. Start with `/pd3` for normal feature work.
-2. Add `/pd7` for large changes.
-3. Add `/pd9` only when you have critical flows that justify the extra gate.
+2. Add `/pd7` for large, critical, auth/payment/data/security, and Cancer-zero changes.
+3. Treat `/pd9` as a reserved custom variant slot unless your organization defines a separate policy.
 4. Add design-time skills like `grill-me` separately before implementation, not inside PD release gates.
