@@ -2,7 +2,7 @@
 
 PD tiers decide how much review and verification a change deserves. The tier is based on risk, scope, and the canonical pathology class.
 
-Note: `orev review` without `--ai` is a deterministic artifact, privacy, and context gate. It does not replace semantic review. PD 5 and PD 7 require an independent reviewer model or hosted review runtime; self-review by the implementing agent does not count as release approval.
+Note: `orev review` without `--ai` is a deterministic artifact, privacy, and context gate. It does not replace semantic review. PD 5 and PD 7 require an independent reviewer model or hosted review runtime; self-review by the implementing agent does not count as release approval. See `docs/EXTERNAL_REVIEWERS.md` for the supported Codex CLI setup path.
 
 ## Tier Matrix
 
@@ -11,7 +11,7 @@ Note: `orev review` without `--ai` is a deterministic artifact, privacy, and con
 | PD 1 | Tiny local change, docs, copy, trivial config, no runtime risk | `orev privacy gate`, optional `code-review` | privacy gate, targeted sanity check, documented Cigarette cleanup if present | Cigarette findings fixed in current pass |
 | PD 3 | Normal feature or bug fix touching a few files | `code-review`, type check, orev deterministic artifact gate | privacy gate, diff/context, deterministic artifact issues, current-pass cleanup evidence | Cigarette + Polyp |
 | PD 5 | Important feature, cross-file behavior, schema/API changes, medium confidence | `SUX_review`, independent reviewer gate, tests, build, orev deterministic artifact gate | tests, build, PR, mandatory cross-model semantic review, current-pass cleanup evidence | Polyp + possible Cancer |
-| PD 7 | Large scope, critical release, auth/payment/data/security, confirmed Cancer from lower tier | save-context, `SUX_review`, independent reviewer gate, tests, build, E2E, architecture check, orev deterministic artifact gate | all PD 5 gates + executable tests + mandatory E2E + architecture impact + Cancer-zero required | Cancer-zero |
+| PD 7 | Large scope, critical release, auth/payment/data/security, confirmed Cancer from lower tier | save-context, `SUX_review`, independent reviewer gate, tests, build, applicable E2E or equivalent executable proof, architecture check, orev deterministic artifact gate | all PD 5 gates + executable tests + applicable E2E/equivalent coverage + architecture impact + Cancer-zero required | Cancer-zero |
 | PD 9 | Reserved slot for community or organization variants | none by default | no default release gate; use PD 7 for highest default verification | custom |
 
 Even-numbered tiers (PD 2, 4, 6, 8) and PD 9 are open slots for community-contributed workflow variants.
@@ -79,7 +79,7 @@ Recommended skill:
 
 - `/pd5`
 
-Use when the change needs build/type verification and mandatory independent semantic review, but executable test depth is not the primary release risk. Cigarette cleanup still happens in the current pass, with the stop streak documented. If the independent reviewer model is unavailable, PD 5 is blocked rather than silently downgraded to self-review.
+Use when the change needs build/type verification and mandatory independent semantic review, but executable test depth is not the primary release risk. Cigarette cleanup still happens in the current pass, with the stop streak documented. Any Cancer finding hard-stops PD 5 and requires mandatory escalation to PD 7 before release work can continue. If the independent reviewer model is unavailable, PD 5 is blocked rather than silently downgraded to self-review.
 `orev` clean means the deterministic artifact gate passed, not that semantic review passed.
 
 ### PD 7: Release Proof
@@ -90,7 +90,7 @@ Recommended skill:
 
 - `/pd7`
 
-Use when correctness must be demonstrated through independent semantic review, executable tests, production build checks, mandatory E2E, architecture impact analysis, and rerun review after fixes. Cigarette findings are fixed during the same pass, and any streak count requires evidence. code-review, ux-review, and SUX Cancer findings must be zero before merge.
+Use when correctness must be demonstrated through independent semantic review, executable tests, production build checks, applicable E2E or equivalent executable coverage, architecture impact analysis, and rerun review after fixes. Cigarette findings are fixed during the same pass, and any streak count requires evidence. code-review, ux-review, and SUX Cancer findings must be zero before merge.
 `orev` clean means the deterministic artifact gate passed, not that semantic review passed.
 
 ### PD 9: Reserved Slot

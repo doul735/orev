@@ -11,10 +11,10 @@ pd5 / pd7
   -> SUX_review
        -> code-review
        -> ux-review
+  -> mandatory independent adversarial review for PD 5/7
   -> tests/build/E2E as required by tier
   -> orev review before commit
   -> commit/PR
-  -> mandatory independent adversarial review for PD 5/7
 
 orev CLI
   -> privacy gate

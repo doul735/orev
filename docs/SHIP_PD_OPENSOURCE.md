@@ -11,7 +11,7 @@ PD tiers are workflow skills with escalating verification depth:
 | `/pd1` | Hygiene pass for docs, config, one-liner changes |
 | `/pd3` | Standard review for normal feature/bug fix work |
 | `/pd5` | Medium scope — SUX_review + independent reviewer + tests + build |
-| `/pd7` | Highest default verification — auth/payment/security/data, Cancer-zero, E2E, architecture |
+| `/pd7` | Highest default verification — auth/payment/security/data, Cancer-zero, applicable E2E/equivalent proof, architecture |
 | `/pd9` | Reserved custom variant slot |
 
 Even-numbered tiers (PD 2, 4, 6, 8) are open slots for community-contributed variants.

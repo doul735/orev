@@ -21,8 +21,8 @@ The skill suite orchestrates agent work:
 - `pd1`, `pd3`, `pd5`, `pd7`: default release workflows with escalating verification depth
 - `pd1`: privacy gate + commit, with current-pass Cigarette cleanup for hygiene changes
 - `pd3`: code-review + type check + orev review (normal features)
-- `pd5`: SUX_review + tests + build + orev review (medium scope)
-- `pd7`: save-context + SUX_review + independent reviewer + tests + build + E2E + architecture + orev review (large/critical scope)
+- `pd5`: SUX_review + independent reviewer + tests + build + orev review (medium scope)
+- `pd7`: save-context + SUX_review + independent reviewer + tests + build + applicable E2E/equivalent proof + architecture + orev review (large/critical scope)
 - `pd9`: reserved custom variant slot
 
 ## Pathology Layer
@@ -54,4 +54,4 @@ See [PD Workflow Tiers](./PD_TIERS.md).
 
 PD 5 and PD 7 require an independent reviewer model or hosted review runtime to read `orev` artifacts and selected source files, then run adversarial review outside the implementing agent's self-review loop.
 
-The direct `orev review --ai` provider path is experimental/self-hosted. It is not required for the default deterministic workflow.
+The packaged default setup path is documented in [External Reviewer Setup](./EXTERNAL_REVIEWERS.md). The direct `orev review --ai` provider path is experimental/self-hosted. It is not required for the default deterministic workflow.

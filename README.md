@@ -81,7 +81,7 @@ The CLI prepares safe local artifacts. The skills orchestrate review, fixes, tes
 | PD 1 | docs, config, one-liners, current-pass Cigarette cleanup | privacy gate |
 | PD 3 | normal feature or bug fix | code review + type check |
 | PD 5 | medium feature work | SUX review + independent reviewer + tests + build |
-| PD 7 | large, high-confidence, auth/payment/security/data release | full verification + independent reviewer + E2E + architecture + Cancer-zero |
+| PD 7 | large, high-confidence, auth/payment/security/data release | full verification + independent reviewer + applicable E2E/equivalent proof + architecture + Cancer-zero |
 | PD 9 | reserved slot | custom community or organization variant |
 
 Even-numbered tiers, PD 2/4/6/8, are open slots for community variants.
@@ -126,6 +126,8 @@ For PD 5 and PD 7, an independent reviewer model or hosted review runtime must c
 4. The skill suite verifies findings, applies selected fixes, and runs tests/build before release.
 
 Self-review by the implementing agent, direct same-agent fallback, and deterministic `orev review` output are supporting evidence only. They do not count as PD 5/7 release approval.
+
+See [External Reviewer Setup](./docs/EXTERNAL_REVIEWERS.md) for the supported Codex CLI receipt path and required evidence.
 
 ## CLI Reference
 
