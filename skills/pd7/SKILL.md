@@ -1,6 +1,6 @@
 ---
 name: pd7
-description: PD 7, 최고 출하 검증. save-context + SUX_review + independent reviewer gate + tests/build/E2E + architecture check + orev deterministic artifact gate.
+description: PD 7, 최고 출하 검증. save-context + SUX_review + independent reviewer gate + tests/build/applicable E2E + architecture check + orev deterministic artifact gate.
 user-invocable: true
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 argument-hint: "[선택: 커밋 메시지 힌트]"
@@ -58,12 +58,15 @@ BLOCK 시 즉시 중단.
 Mandatory release gate. The implementing agent must not be the final semantic reviewer.
 
 - Run semantic review with an independent reviewer model or hosted review runtime.
+- Default supported setup path: `docs/EXTERNAL_REVIEWERS.md`, using `codex exec review --base <base> --model <model> --json -o <receipt.md>` or an equivalent hosted reviewer receipt.
 - Use privacy-gated `orev` artifacts and selected source context as input.
 - Local self-review, direct same-agent analysis, and deterministic `orev review` output are supporting evidence only; they do not count as release approval.
 - If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
 - Report reviewer identity, invocation evidence, reviewed artifacts, and Cancer/Polyp/Cigarette counts.
+- If the independent reviewer reports Cancer or Polyp findings, stop before executable proof, commit, or PR, fix the findings, and rerun the independent reviewer gate. PD 7 may proceed only when independent reviewer Cancer and Polyp counts are 0.
+- If the independent reviewer reports Cigarette-only findings, fix them in the current pass and record cycle evidence before proceeding.
 
-### Step 5: 실행형 테스트 + 프로덕션 빌드 + E2E
+### Step 5: 실행형 테스트 + 프로덕션 빌드 + applicable E2E
 
 #### 5-1. 실행형 테스트
 ```bash
@@ -82,12 +85,12 @@ pnpm run check
 pnpm run build
 ```
 
-#### 5-4. E2E
+#### 5-4. E2E / equivalent executable proof
 ```bash
 pnpm test:e2e
 ```
 
-E2E는 UI 변경 유무와 무관하게 필수 실행한다. 프로젝트에 E2E가 없으면 `[blocked] E2E unavailable` 또는 사용자 승인 기반 예외를 명시한다.
+E2E는 사용자 여정, UI, browser-visible flow, auth/payment/data/security 경계가 실제 end-to-end surface를 갖는 경우 필수 실행한다. API, library, backend service처럼 E2E suite가 없는 프로젝트는 `[blocked] E2E unavailable`로 멈추는 대신 equivalent executable coverage를 실행하고 증거를 남긴다. 예: integration tests, contract tests, API smoke tests, migration dry-run, CLI/library driver script. 해당 변경에 맞는 equivalent coverage도 없으면 `[blocked] executable proof unavailable`로 중단하거나 사용자 승인 기반 예외를 명시한다.
 
 ### Step 6: 아키텍처 영향 점검
 
@@ -111,6 +114,7 @@ orev review . --out "$TMP_DIR/pd7-review.md" --verbose
 ```
 
 deterministic 결과만 확인한다. secret, privacy, context, report issue가 있으면 수정하고 다시 실행한다.
+orev 실패 시 중단하고 실패 원인을 보고한다. 직접 same-agent 분석은 참고 자료일 뿐, deterministic artifact gate를 대체하지 않는다.
 
 ### Step 8: Commit & PR
 
@@ -126,10 +130,11 @@ deterministic 결과만 확인한다. secret, privacy, context, report issue가 
 - [ ] privacy gate ALLOW
 - [ ] SUX_review 실행 + finding 전체 수정
 - [ ] independent reviewer gate 통과, self-review가 approval로 계산되지 않았다는 증거
+- [ ] independent reviewer Cancer 0 / Polyp 0 확인, Cigarette-only findings는 현재 패스 수정 완료
 - [ ] Cancer 0건 확인
 - [ ] 테스트 전체 통과
 - [ ] 빌드 성공
-- [ ] E2E 통과
+- [ ] applicable E2E 통과 또는 equivalent executable coverage 증거 기록
 - [ ] 아키텍처 점검 완료
 - [ ] orev 결정론적 gate 완료
 - [ ] PR 생성됨
@@ -149,7 +154,7 @@ PD 7 완료!
 4. Independent reviewer gate: [reviewer/runtime, invocation evidence, result]
 5. 테스트: N개 통과 (Ns)
 6. 빌드: 통과
-7. E2E: 통과
+7. E2E / equivalent executable proof: [통과|해당 없음 + 대체 증거]
 8. 아키텍처: [영향 없음|영향 보고됨]
 9. orev 결정론적 gate: 클린 확인 → 머지 가능
 10. 커밋: /commit skill 또는 command invocation, <해시> <메시지>
@@ -162,4 +167,4 @@ PD 7 완료!
 - independent reviewer gate 미실행/실패 → 중단
 - Cancer 발견 후 수정 불가 → 중단 + 에스컬레이션
 - Cancer 0건 미달 → 머지 차단
-- 테스트/빌드/E2E 2회 실패 → 중단
+- 테스트/빌드/applicable E2E 또는 equivalent executable coverage 2회 실패 → 중단

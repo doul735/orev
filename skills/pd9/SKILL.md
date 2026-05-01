@@ -19,7 +19,9 @@ PD 9 is intentionally empty. Like PD 2/4/6/8, it is reserved for community or or
 ## Runtime Response
 
 ```text
-PD 9 is a reserved slot.
+BLOCKED: PD 9 is a reserved slot, not a release workflow.
 The highest default verification tier is /pd7.
 Use /pd7 for auth/payment/data/security or Cancer-zero releases.
 ```
+
+Do not create release approval, commits, PRs, or verification evidence from PD 9.

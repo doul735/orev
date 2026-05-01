@@ -38,7 +38,8 @@ orev privacy gate . --verbose
 - 실행 증거를 남긴다. invocation method, changed-files basis, `--fix` 적용 여부를 기록한다.
 - 모든 finding에 Cigarette/Polyp/Cancer 분류
 - legacy: MUST-FIX / SHOULD-FIX / NIT, Quick Win / Major / Nice-to-have 메타데이터는 보조 정보로만 남긴다.
-- Cancer 발견 → PD 7 에스컬레이션 권고
+- Cancer 발견 → 즉시 중단. PD 7로 mandatory escalation을 기록하고, Cancer가 0건이 될 때까지 테스트/빌드/커밋/PR 단계로 진행하지 않는다.
+- Polyp 발견 → 현재 패스에서 수정하고, Polyp 0건이 될 때까지 independent reviewer, tests, build, commit, PR 단계로 진행하지 않는다.
 - Cigarette 발견은 현재 패스에서 수정하고, 보고서에 cycle evidence, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation을 남긴다.
 
 ### Step 3: Independent Reviewer Gate
@@ -46,10 +47,14 @@ orev privacy gate . --verbose
 Mandatory release gate. The implementing agent must not be the final semantic reviewer.
 
 - Run semantic review with an independent reviewer model or hosted review runtime.
+- Default supported setup path: `docs/EXTERNAL_REVIEWERS.md`, using `codex exec review --base <base> --model <model> --json -o <receipt.md>` or an equivalent hosted reviewer receipt.
 - Use privacy-gated `orev` artifacts and selected source context as input.
 - Local self-review, direct same-agent analysis, and deterministic `orev review` output are supporting evidence only; they do not count as release approval.
 - If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
 - Report reviewer identity, invocation evidence, reviewed artifacts, and Cancer/Polyp/Cigarette counts.
+- If the independent reviewer reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7. Do not continue under PD 5 after fixing a Cancer-class issue.
+- If the independent reviewer reports Polyp findings, stop before tests, build, commit, or PR, fix the findings, and rerun the independent reviewer gate. PD 5 may proceed only when independent reviewer Cancer and Polyp counts are 0.
+- If the independent reviewer reports Cigarette-only findings, fix them in the current pass and record cycle evidence before proceeding.
 
 ### Step 4: 실행형 테스트
 
@@ -76,7 +81,7 @@ orev review . --out "$TMP_DIR/pd5-review.md" --verbose
 
 deterministic 결과만 본다. secret, privacy, context, report issue가 있으면 수정하고 다시 실행한다.
 
-orev 실패 시 Claude Code 직접 분석 fallback.
+orev 실패 시 중단하고 실패 원인을 보고한다. 직접 same-agent 분석은 참고 자료일 뿐, deterministic artifact gate를 대체하지 않는다.
 
 ### Step 7: Commit & PR
 
@@ -90,7 +95,9 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 
 - [ ] privacy gate ALLOW
 - [ ] SUX_review 실행 + finding 수정
+- [ ] Cancer 0건 확인 또는 PD 7 mandatory escalation으로 중단
 - [ ] independent reviewer gate 통과, self-review가 approval로 계산되지 않았다는 증거
+- [ ] independent reviewer Cancer 0 / Polyp 0 확인, Cigarette-only findings는 현재 패스 수정 완료
 - [ ] 테스트 전체 통과
 - [ ] 빌드 성공
 - [ ] orev 결정론적 gate 완료
@@ -103,8 +110,8 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 PD 5 완료!
 1. Privacy Gate: ALLOW
 2. SUX Review:
-   - code-review: Cancer N, Polyp N, Cigarette N → 현재 패스 수정
-   - ux-review: Cancer N, Polyp N, Cigarette N → 현재 패스 수정
+   - code-review: Cancer 0, Polyp N, Cigarette N → Polyp/Cigarette 현재 패스 수정
+   - ux-review: Cancer 0, Polyp N, Cigarette N → Polyp/Cigarette 현재 패스 수정
    - Cycle evidence: [iteration/workflow name, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation]
 3. Independent reviewer gate: [reviewer/runtime, invocation evidence, result]
 4. 테스트: N개 통과 (Ns)

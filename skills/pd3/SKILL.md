@@ -33,7 +33,8 @@ BLOCK 시 즉시 중단.
 - `/code-review --fix` 스킬을 runtime의 공식 skill/command invocation mechanism으로 실행한다.
 - 모든 finding에 Cigarette/Polyp/Cancer 분류 적용
 - legacy: MUST-FIX / SHOULD-FIX / NIT 메타데이터는 보조 정보로만 남긴다.
-- Cancer 발견 → PD 7 에스컬레이션 권고
+- Cancer 발견 → 즉시 중단. PD 7로 mandatory escalation을 기록하고, PD 3 타입 체크/orev/커밋/PR 단계로 진행하지 않는다.
+- Polyp 발견 → 현재 패스에서 수정하고, Polyp 0건이 될 때까지 타입 체크/orev/커밋/PR 단계로 진행하지 않는다.
 - Cigarette 발견은 현재 패스에서 수정하고, 보고서에 cycle evidence, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation을 남긴다.
 
 ### Step 3: 타입 체크
@@ -58,7 +59,7 @@ orev review . --out "$TMP_DIR/pd3-review.md" --verbose
 - deterministic issue 발견 → 수정 → Step 4 재실행 (최대 2회)
 - issue 없음 → Step 5로 진행
 
-orev 실패 시 Claude Code 직접 분석 fallback.
+orev 실패 시 중단하고 실패 원인을 보고한다. 직접 same-agent 분석은 참고 자료일 뿐, deterministic artifact gate를 대체하지 않는다.
 
 ### Step 5: Commit & PR
 
@@ -69,6 +70,7 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 각 Step 완료 시 증거 확인:
 - [ ] privacy gate ALLOW
 - [ ] code-review 실행 + finding 수정 완료
+- [ ] Cancer 0건 확인 또는 PD 7 escalation으로 중단
 - [ ] tsc 통과
 - [ ] orev 결정론적 gate 완료
 - [ ] /commit skill 또는 command invocation 증거
@@ -79,7 +81,7 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 ```
 PD 3 완료!
 1. Privacy Gate: ALLOW
-2. Code Review: Cancer N건, Polyp N건, Cigarette N건 → 현재 패스 수정 완료
+2. Code Review: Cancer 0건, Polyp N건, Cigarette N건 → Polyp/Cigarette 현재 패스 수정 완료
    - Cycle evidence: [iteration/workflow name, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation]
 3. 타입 체크: 통과
 4. orev 결정론적 gate: [클린|issue 수정 완료|에스컬레이션]
