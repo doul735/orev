@@ -50,8 +50,8 @@ PD tiers map change risk to workflow depth:
 
 See [PD Workflow Tiers](./PD_TIERS.md).
 
-## Production AI Review
+## Optional Hosted Review
 
-Production adversarial review runs through OMO/OhMyOpenCode. OMO reads `orev` artifacts and selected source files, then runs GPT-5.5 Pro review through its subscription-backed runtime.
+If a hosted review runtime such as OMO/OhMyOpenCode is available, it can read `orev` artifacts and selected source files, then run adversarial review outside the target project.
 
-The direct `orev review --ai` provider path is experimental/self-hosted. It is not the production path.
+The direct `orev review --ai` provider path is experimental/self-hosted. It is not required for the default deterministic workflow.

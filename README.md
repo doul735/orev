@@ -114,16 +114,16 @@ Install or adapt the skill files under `skills/` into your agent runtime.
 
 Deprecated `ship` and `ship7` templates are kept under `skills/_deprecated/` for migration reference only.
 
-## Use With OMO
+## Optional Hosted Review
 
-The recommended production adversarial review path is OMO, OhMyOpenCode:
+If OMO, OhMyOpenCode, or another hosted review runtime is available, it can consume `orev` artifacts for adversarial review:
 
 1. `orev` creates privacy-gated local artifacts.
-2. OMO reads those artifacts and selected source files.
-3. GPT-5.5 Pro performs adversarial review through the OMO runtime.
+2. The hosted review runtime reads those artifacts and selected source files.
+3. A stronger review model performs adversarial review through that runtime.
 4. The skill suite verifies findings, applies selected fixes, and runs tests/build before release.
 
-OMO is optional for external users. The deterministic CLI and PD workflow can be used without OMO.
+Hosted review is optional. The deterministic CLI and PD workflow can be used without it.
 
 ## CLI Reference
 
@@ -200,7 +200,7 @@ Generated `dist/` files are ignored in git. They are included in the npm package
 
 ## Acknowledgements
 
-Most of `orev` is original work, including the CLI engine, PD tier model, code pathology taxonomy, privacy-gated artifact flow, and OMO-based review workflow.
+The implementation and packaging of the core `orev` components are original to this project, including the CLI engine, PD tier model, code pathology taxonomy, and privacy-gated artifact flow.
 
 Some development workflow ideas were influenced by public Claude Code skill projects. See [Acknowledgements](./docs/ACKNOWLEDGEMENTS.md).
 
