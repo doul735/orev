@@ -11,7 +11,14 @@
   "files": [
     "dist",
     "skills",
-    "docs",
+    "docs/ACKNOWLEDGEMENTS.md",
+    "docs/ADAPT_THIS_WORKFLOW.md",
+    "docs/ARCHITECTURE.md",
+    "docs/GETTING_STARTED.md",
+    "docs/MIGRATION_ROADMAP.md",
+    "docs/PATHOLOGY_TAXONOMY.md",
+    "docs/PD_TIERS.md",
+    "docs/SHIP_PD_OPENSOURCE.md",
     "README.md",
     "LICENSE"
   ],
