@@ -18,8 +18,12 @@ The skill suite orchestrates agent work:
 - `code-review`: security and code-quality review
 - `ux-review`: product and UX gap review
 - `SUX_review`: parallel integrated review
-- `ship`: review, fix, build, commit, PR, adversarial review
-- `ship7`: `/ship` plus executable tests and stronger release gates
+- `pd1` through `pd9`: release workflows with escalating verification depth
+- `pd1`: privacy gate + commit (docs/config)
+- `pd3`: code-review + type check + orev review (normal features)
+- `pd5`: SUX_review + tests + build + orev review (medium scope)
+- `pd7`: save-context + SUX_review + tests + build + E2E + orev review (large scope)
+- `pd9`: full package + architecture check + Cancer-zero gate (auth/payment/security)
 
 ## Pathology Layer
 
@@ -41,6 +45,8 @@ PD tiers map change risk to workflow depth:
 - PD 3: standard review for normal feature work
 - PD 5: ship candidate workflow for important or cross-file changes
 - PD 7: release proof workflow for Cancer-class or high-risk changes
+- PD 9: full package for auth/payment/security, Cancer-zero required
+- Even tiers (2, 4, 6, 8): open community variant slots
 
 See [PD Workflow Tiers](./PD_TIERS.md).
 

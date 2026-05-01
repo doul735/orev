@@ -1,40 +1,32 @@
-# Ship Series Open-Source Strategy
+# PD Series Open-Source Strategy
 
-The ship series packages repeatable release workflows for AI coding agents.
+The PD (Pllet Data) series packages repeatable release workflows for AI coding agents.
 
 ## Concept
 
-`/ship` and `/ship7` are workflow skills:
+PD tiers are workflow skills with escalating verification depth:
 
 | Skill | Purpose |
 |---|---|
-| `/ship1` concept | lightweight hygiene pass for tiny low-risk changes |
-| `/ship3` concept | standard review workflow for normal feature work |
-| `/ship` | Review, fix, build-check, commit, PR, and adversarial review |
-| `/ship7` | `/ship` plus executable tests, production build, and stronger release gates |
+| `/pd1` | Hygiene pass for docs, config, one-liner changes |
+| `/pd3` | Standard review for normal feature/bug fix work |
+| `/pd5` | Medium scope — SUX_review + tests + build |
+| `/pd7` | Large scope — full verification with E2E |
+| `/pd9` | Full package — auth/payment/security, Cancer-zero required |
 
-The public product name is the ship series. The initial implementation ships `/ship` and `/ship7`; `/ship1`, `/ship3`, and `/ship5` are tier concepts that can become concrete skills when the workflows stabilize.
+Even-numbered tiers (PD 2, 4, 6, 8) are open slots for community-contributed variants.
 
 ## Pathology Model
 
-The ship series uses three pathology classes to explain why a finding matters:
+The PD series uses three pathology classes to explain why a finding matters:
 
 | Class | Meaning | Workflow Response |
 |---|---|---|
 | Cigarette | Small harmful habit. Not urgent alone, but harmful when repeated. | PD 1 or PD 3 cleanup |
 | Polyp | Localized abnormal growth. Actionable before it spreads. | PD 3 or PD 5 fix-before-release |
-| Cancer | Invasive/systemic risk. Can compromise release, data, security, or trust. | PD 7 containment and rerun verification |
+| Cancer | Invasive/systemic risk. Can compromise release, data, security, or trust. | PD 7/9 containment and rerun verification |
 
 Pathology is a routing lens. It does not replace MUST-FIX, SHOULD-FIX, NIT, Quick Win, Major, or Nice-to-have.
-
-## PD Tiers
-
-| Tier | Use When | Default Workflow |
-|---|---|---|
-| PD 1 | docs/copy/tiny local change, Cigarette only | privacy gate + targeted check |
-| PD 3 | normal feature or bug fix, localized Polyp risk | code-review + ux-review or SUX_review |
-| PD 5 | important feature, cross-file behavior, medium release risk | ship |
-| PD 7 | auth/payment/data/security, large diff, confirmed Cancer | ship7 |
 
 ## Public Scope
 
@@ -44,9 +36,8 @@ Publish these components together:
 2. `skills/code-review`
 3. `skills/ux-review`
 4. `skills/SUX_review`
-5. `skills/ship`
-6. `skills/ship7`
-7. architecture and customization docs
+5. `skills/pd1` through `skills/pd9`
+6. Architecture, pathology, and customization docs
 
 ## Design Principles
 
@@ -70,14 +61,21 @@ orev/
     code-review/SKILL.md
     ux-review/SKILL.md
     SUX_review/SKILL.md
-    ship/SKILL.md
-    ship7/SKILL.md
+    pd1/SKILL.md
+    pd3/SKILL.md
+    pd5/SKILL.md
+    pd7/SKILL.md
+    pd9/SKILL.md
+    _deprecated/
+      ship/SKILL.md
+      ship7/SKILL.md
   docs/
-    MIGRATION_ROADMAP.md
-    SHIP_PD_OPENSOURCE.md
+    ACKNOWLEDGEMENTS.md
     ARCHITECTURE.md
+    MIGRATION_ROADMAP.md
     PATHOLOGY_TAXONOMY.md
     PD_TIERS.md
+    SHIP_PD_OPENSOURCE.md
 ```
 
 ## Release Checklist

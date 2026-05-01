@@ -3,14 +3,14 @@
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
-`orev` is an open review and ship workflow suite for AI coding agents. It combines privacy-gated review artifacts, code review, UX review, and ship7-style release verification.
+`orev` is an open review and release workflow suite for AI coding agents. It combines privacy-gated review artifacts, code review, UX review, and PD tier-based release verification.
 
 ## What
 
 `orev` has two layers:
 
 - **CLI engine**: deterministic `privacy gate`, `diff-scope`, `context`, and review report commands.
-- **Skill suite**: reusable agent workflows for `code-review`, `ux-review`, `SUX_review`, `ship`, and `ship7`.
+- **Skill suite**: reusable agent workflows — `pd1` through `pd9` release tiers, plus `code-review`, `ux-review`, and `SUX_review`.
 
 The CLI prepares safe local artifacts. The skills orchestrate review, fixes, tests, pull requests, and final adversarial review.
 
@@ -21,7 +21,7 @@ AI coding agents need a repeatable release gate, not just one-off code generatio
 - privacy before review: block secrets before any AI review step
 - deterministic context: collect diff and context artifacts locally
 - review separation: code-quality review and UX/planning review are separate
-- ship discipline: tests/build/PR/adversarial review happen before release
+- release discipline: tests/build/PR/adversarial review happen before release
 - pathology routing: Cigarette, Polyp, and Cancer labels explain blast radius and escalation
 - PD tiers: pick the right workflow depth for the change size and risk
 - OMO-first production review: production adversarial review runs through OhMyOpenCode (OMO), not project-local API keys
@@ -56,11 +56,19 @@ orev review . --out /tmp/orev-review.md
 Run the suite workflow by installing the skill files under `skills/` into your agent runtime and invoking:
 
 ```text
-/code-review
-/ux-review
-/SUX_review
-/ship
-/ship7
+/pd1          # docs, config, one-liner
+/pd3          # normal feature/bug fix
+/pd5          # medium scope, tests + build
+/pd7          # large scope, full verification
+/pd9          # critical (auth/payment), Cancer-zero required
+```
+
+Individual review skills are also available:
+
+```text
+/code-review  # code quality + security
+/ux-review    # UX gap analysis
+/SUX_review   # parallel code + UX review
 ```
 
 ## Use With OMO
@@ -132,11 +140,12 @@ The built-in `claude` provider path reads `ANTHROPIC_API_KEY` only when this exp
 ## Architecture
 
 ```text
-skills/ship7
+skills/pd7 (example)
+  -> privacy-gate
   -> skills/SUX_review
        -> skills/code-review
        -> skills/ux-review
-  -> tests/build
+  -> tests/build/E2E
   -> commit/PR
   -> OMO GPT-5.5 Pro adversarial review
 
@@ -163,6 +172,9 @@ PD tiers map that risk to workflow depth:
 - PD 3: standard review
 - PD 5: ship candidate
 - PD 7: release proof
+- PD 9: full package (Cancer-zero required)
+
+Even-numbered tiers (PD 2, 4, 6, 8) are open slots for community-contributed variants.
 
 See [Code Pathology Taxonomy](./docs/PATHOLOGY_TAXONOMY.md) and [PD Workflow Tiers](./docs/PD_TIERS.md).
 

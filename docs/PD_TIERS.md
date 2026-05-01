@@ -6,10 +6,13 @@ PD tiers decide how much review and verification a change deserves. The tier is 
 
 | Tier | Use When | Default Skills | Gates | Pathology Fit |
 |---|---|---|---|---|
-| PD 1 | Tiny local change, docs, copy, trivial config, no runtime risk | `orev privacy gate`, optional `code-review` or `ux-review` | privacy gate, targeted sanity check | Cigarette only |
-| PD 3 | Normal feature or bug fix touching a few files | `code-review`, `ux-review`, `SUX_review` | privacy gate, diff/context, selected fixes, project check | Cigarette + Polyp |
-| PD 5 | Important feature, cross-file behavior, schema/API changes, medium confidence | `SUX_review`, `ship` | build/type-check, PR, OMO adversarial review | Polyp + possible Cancer |
-| PD 7 | Critical release, auth/payment/data/security, large diff, confirmed Cancer | `ship7` | executable tests, production build, OMO adversarial review, rerun after fixes | Cancer |
+| PD 1 | Tiny local change, docs, copy, trivial config, no runtime risk | `orev privacy gate`, optional `code-review` | privacy gate, targeted sanity check | Cigarette only |
+| PD 3 | Normal feature or bug fix touching a few files | `code-review`, type check, orev review | privacy gate, diff/context, selected fixes | Cigarette + Polyp |
+| PD 5 | Important feature, cross-file behavior, schema/API changes, medium confidence | `SUX_review`, tests, build, orev review | tests, build, PR, OMO adversarial review | Polyp + possible Cancer |
+| PD 7 | Large scope, critical release, confirmed Cancer from lower tier | save-context, `SUX_review`, tests, build, E2E, orev review | executable tests, production build, E2E, OMO adversarial review | Cancer |
+| PD 9 | Auth/payment/data/security, full package | save-context, `SUX_review`, tests, build, E2E, architecture check, orev review | all PD 7 gates + architecture impact + Cancer-zero required | Cancer-zero |
+
+Even-numbered tiers (PD 2, 4, 6, 8) are open slots for community-contributed workflow variants.
 
 ## Routing Rules
 
