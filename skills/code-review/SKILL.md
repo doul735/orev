@@ -38,6 +38,12 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
 
 6. Verify each finding against the actual code before reporting it.
 
+7. Assign a pathology class to each finding:
+
+   - Cigarette: low blast-radius habit or repeated small debt
+   - Polyp: localized actionable issue that can spread if ignored
+   - Cancer: systemic, security-sensitive, data-loss, or release-blocking issue
+
 ## Report Format
 
 ```markdown
@@ -47,11 +53,13 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
 - Changed files: N
 - OMO review: success|fallback
 - Results: MUST-FIX X, SHOULD-FIX Y, NIT Z
+- Pathology: Cigarette X, Polyp Y, Cancer Z
 
 ### MUST-FIX
 1. **Title** `file:line`
    - Problem: ...
    - Evidence: ...
+   - Pathology: Cancer — blast radius / infection path / containment
    - Source: OMO GPT-5.5 Pro | local verification | static analysis
    - Recommendation: ...
 ```
@@ -62,3 +70,4 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
 - Do not report unverified findings as facts.
 - Do not call direct provider APIs by default.
 - Use `orev review --ai` only as an experimental/self-hosted path.
+- Escalate Cancer findings to PD 7.

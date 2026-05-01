@@ -22,6 +22,8 @@ AI coding agents need a repeatable release gate, not just one-off code generatio
 - deterministic context: collect diff and context artifacts locally
 - review separation: code-quality review and UX/planning review are separate
 - ship discipline: tests/build/PR/adversarial review happen before release
+- pathology routing: Cigarette, Polyp, and Cancer labels explain blast radius and escalation
+- PD tiers: pick the right workflow depth for the change size and risk
 - OMO-first production review: production adversarial review runs through OhMyOpenCode (OMO), not project-local API keys
 
 ## Install
@@ -146,6 +148,23 @@ orev CLI
 ```
 
 `orev` stores generated artifacts in `.orev/`. That directory is ignored by git.
+
+## Pathology And PD Tiers
+
+`orev` uses pathology labels to describe spread risk:
+
+- Cigarette: small harmful habit
+- Polyp: localized actionable issue
+- Cancer: systemic or release-blocking issue
+
+PD tiers map that risk to workflow depth:
+
+- PD 1: hygiene pass
+- PD 3: standard review
+- PD 5: ship candidate
+- PD 7: release proof
+
+See [Code Pathology Taxonomy](./docs/PATHOLOGY_TAXONOMY.md) and [PD Workflow Tiers](./docs/PD_TIERS.md).
 
 ## Development
 

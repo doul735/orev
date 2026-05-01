@@ -30,9 +30,21 @@ argument-hint: "[optional commit message hint]"
 
 7. Fix MUST-FIX and SHOULD-FIX findings, then rerun tests/build.
 
+## PD Tier
+
+`ship7` is the PD 7 workflow. Use it for confirmed Cancer findings, auth/payment/data/security work, large diffs, or release candidates that need executable proof.
+
+Cancer findings require containment before release:
+
+1. identify blast radius
+2. identify infection path
+3. fix root cause
+4. rerun executable tests and OMO review
+
 ## Rules
 
 - Executable tests are the primary gate.
 - Build failures block shipping.
 - Never push directly to `main` or `master`.
 - Direct provider/API review is not the default path.
+- PD 7 is mandatory for Cancer-class release risk.

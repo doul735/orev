@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -7,7 +8,7 @@ import type { ContextArtifact, DiffScopeArtifact } from "../src/types.js";
 
 const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(".");
-const fixtureRoot = path.join(projectRoot, "tests", "fixtures");
+const fixtureRoot = path.join(tmpdir(), "orev-artifacts-tests");
 let tempRoot = "";
 
 async function git(args: string[], cwd: string): Promise<void> {

@@ -59,16 +59,25 @@ The direct provider path, `orev review --ai`, remains available only as an exper
 - Run `/code-review` and `/ux-review` as independent review tracks.
 - Merge results into one report.
 - Let users choose immediate fixes.
+- Summarize pathology counts and recommend a PD tier.
 
-### 6. Ship And Ship7
+### 6. Pathology And PD Routing
+
+- Classify review findings as Cigarette, Polyp, or Cancer.
+- Use pathology to explain blast radius, infection path, and containment.
+- Route workflow depth through PD 1, PD 3, PD 5, or PD 7.
+
+### 7. Ship And Ship7
 
 - Run save-context, SUX review, fixes, build/tests, commit/PR, and OMO adversarial review.
-- `/ship` focuses on build/type verification.
-- `/ship7` adds executable tests and stronger release checks.
+- `/ship` is the PD 5 workflow and focuses on build/type verification plus adversarial review.
+- `/ship7` is the PD 7 workflow and adds executable tests, containment, and stronger release checks.
 
 ## Public Interface Contract
 
 - `/code-review`, `/ux-review`, `/SUX_review`, `/ship`, and `/ship7` names remain stable.
+- PD 1, PD 3, PD 5, and PD 7 are routing tiers; only `/ship` and `/ship7` need concrete skill commands initially.
+- Cigarette, Polyp, and Cancer are review-routing labels, not replacements for existing severity labels.
 - `orev` artifacts are implementation details unless users opt into the CLI directly.
 - Direct provider/API review is experimental and must warn users at runtime.
 

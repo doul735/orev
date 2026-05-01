@@ -36,7 +36,13 @@ Review changed code for product completeness and UX gaps. This is not a security
    - Major: high impact, higher effort
    - Nice-to-have: lower impact, low effort
 
-5. If OMO is available, run GPT-5.5 Pro UX review from the artifacts and source context. Otherwise, perform local agent analysis and mark the report as fallback.
+5. Assign a pathology class:
+
+   - Cigarette: small UX habit or polish gap that compounds over time
+   - Polyp: localized flow or state gap that should be fixed before release
+   - Cancer: systemic UX failure that breaks a core path or user trust
+
+6. If OMO is available, run GPT-5.5 Pro UX review from the artifacts and source context. Otherwise, perform local agent analysis and mark the report as fallback.
 
 ## Report Format
 
@@ -46,11 +52,13 @@ Review changed code for product completeness and UX gaps. This is not a security
 ### Summary
 - Files reviewed: N
 - Findings: N (Quick Win X, Major Y, Nice-to-have Z)
+- Pathology: Cigarette X, Polyp Y, Cancer Z
 
 ### Quick Win
 1. **Title** — lens: state handling
    - Current: ...
    - Suggestion: ...
+   - Pathology: Polyp — blast radius / infection path / containment
    - Location: `file:line`
 ```
 
@@ -59,3 +67,4 @@ Review changed code for product completeness and UX gaps. This is not a security
 - Use code-confirmed facts only.
 - Include file and line references where possible.
 - Do not call direct provider APIs by default.
+- Escalate Cancer findings to PD 7.

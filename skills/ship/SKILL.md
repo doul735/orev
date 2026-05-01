@@ -24,9 +24,16 @@ Run a complete shipping workflow for AI-assisted changes.
 
 6. Fix MUST-FIX and SHOULD-FIX findings, then verify again.
 
+## PD Tier
+
+`ship` is the PD 5 workflow. Use it for important feature work, cross-file changes, API/schema/service boundaries, or repeated Polyp findings.
+
+Escalate to `ship7` when a Cancer finding appears or executable behavior must be proven.
+
 ## Rules
 
 - Never push directly to `main` or `master`.
 - Never force-push unless explicitly approved.
 - Never expose raw secrets in reports.
 - Direct provider/API review is not the default path.
+- PD 5 can ship Polyp findings only after containment is documented.
