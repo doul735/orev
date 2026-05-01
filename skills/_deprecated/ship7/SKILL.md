@@ -20,7 +20,7 @@ argument-hint: "[optional commit message hint]"
 
 4. Run production build checks when available.
 5. Commit on a feature branch and open or update a PR.
-6. Run OMO GPT-5.5 Pro adversarial review using `orev` artifacts:
+6. If available, run hosted adversarial review using `orev` artifacts:
 
    ```bash
    orev privacy gate . --verbose
@@ -39,7 +39,7 @@ Cancer findings require containment before release:
 1. identify blast radius
 2. identify infection path
 3. fix root cause
-4. rerun executable tests and OMO review
+4. rerun executable tests and hosted review
 
 ## Rules
 

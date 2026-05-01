@@ -42,7 +42,7 @@ Review changed code for product completeness and UX gaps. This is not a security
    - Polyp: localized flow or state gap that should be fixed before release
    - Cancer: systemic UX failure that breaks a core path or user trust
 
-6. If OMO is available, run GPT-5.5 Pro UX review from the artifacts and source context. Otherwise, perform local agent analysis and mark the report as fallback.
+6. If a hosted review runtime is available, run UX review from the artifacts and source context. Otherwise, perform local agent analysis and mark the report as fallback.
 
 ## Report Format
 

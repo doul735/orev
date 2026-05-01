@@ -26,7 +26,7 @@ PD 5 이상은 구현 전에 `/grill-me`로 설계를 검증하는 것을 권장
 ### Step 1: Privacy Gate
 
 ```bash
-node orev privacy gate . --verbose
+orev privacy gate . --verbose
 ```
 
 ### Step 2: SUX Review (Code + UX 병렬)
@@ -49,18 +49,20 @@ node orev privacy gate . --verbose
 pnpm run build
 ```
 
-### Step 5: Commit & PR
+### Step 5: orev 리뷰 (커밋 전)
 
-`/commit` 스킬을 실행한다.
-
-### Step 6: orev 리뷰 (OMO)
+**반드시 커밋 전에 실행** — 커밋 후에는 diff가 비어서 리뷰 불가.
 
 ```bash
 TMP_DIR=$(mktemp -d /tmp/orev-pd5-review.XXXXXX)
-node orev review . --out "$TMP_DIR/pd5-review.md" --verbose
+orev review . --out "$TMP_DIR/pd5-review.md" --verbose
 ```
 
 orev 실패 시 Claude Code 직접 분석 fallback.
+
+### Step 6: Commit & PR
+
+`/commit` 스킬을 실행한다.
 
 ### 디버깅
 
@@ -72,8 +74,8 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 - [ ] SUX_review 실행 + finding 수정
 - [ ] 테스트 전체 통과
 - [ ] 빌드 성공
-- [ ] PR 생성됨
 - [ ] orev 리뷰 완료
+- [ ] PR 생성됨
 
 ## 보고서
 

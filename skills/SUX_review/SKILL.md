@@ -34,7 +34,7 @@ Run `code-review` and `ux-review` independently, then merge the results.
 ...
 
 ## Routing
-- Recommended PD tier: PD 1 | PD 3 | PD 5 | PD 7
+- Recommended PD tier: PD 1 | PD 3 | PD 5 | PD 7 | PD 9
 - Reason: scope, severity, pathology, and confidence
 ```
 

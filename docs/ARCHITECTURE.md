@@ -43,15 +43,15 @@ PD tiers map change risk to workflow depth:
 
 - PD 1: hygiene pass for Cigarette-only changes
 - PD 3: standard review for normal feature work
-- PD 5: ship candidate workflow for important or cross-file changes
+- PD 5: release candidate workflow for important or cross-file changes
 - PD 7: release proof workflow for Cancer-class or high-risk changes
 - PD 9: full package for auth/payment/security, Cancer-zero required
 - Even tiers (2, 4, 6, 8): open community variant slots
 
 See [PD Workflow Tiers](./PD_TIERS.md).
 
-## Production AI Review
+## Optional Hosted Review
 
-Production adversarial review runs through OMO/OhMyOpenCode. OMO reads `orev` artifacts and selected source files, then runs GPT-5.5 Pro review through its subscription-backed runtime.
+If a hosted review runtime such as OMO/OhMyOpenCode is available, it can read `orev` artifacts and selected source files, then run adversarial review outside the target project.
 
-The direct `orev review --ai` provider path is experimental/self-hosted. It is not the production path.
+The direct `orev review --ai` provider path is experimental/self-hosted. It is not required for the default deterministic workflow.

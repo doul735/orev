@@ -3,84 +3,127 @@
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
-`orev` is an open review and release workflow suite for AI coding agents. It combines privacy-gated review artifacts, code review, UX review, and PD tier-based release verification.
+**The open-source release workflow for AI coding agents.**
 
-## What
+`orev` helps you stop shipping AI-generated code like a toy project. Use it directly as a privacy-gated CLI, or adapt its PD-tier review workflow into your own Claude Code, Cursor, Codex, or custom agent setup.
 
-`orev` has two layers:
-
-- **CLI engine**: deterministic `privacy gate`, `diff-scope`, `context`, and review report commands.
-- **Skill suite**: reusable agent workflows — `pd1` through `pd9` release tiers, plus `code-review`, `ux-review`, and `SUX_review`.
-
-The CLI prepares safe local artifacts. The skills orchestrate review, fixes, tests, pull requests, and final adversarial review.
+```text
+small change      -> /pd1
+normal bugfix     -> /pd3
+feature work      -> /pd5
+release proof     -> /pd7
+auth/payment/data -> /pd9
+```
 
 ## Why
 
-AI coding agents need a repeatable release gate, not just one-off code generation. `orev` focuses on:
+AI coding agents make code changes fast. Release discipline still has to be deliberate.
 
-- privacy before review: block secrets before any AI review step
-- deterministic context: collect diff and context artifacts locally
-- review separation: code-quality review and UX/planning review are separate
-- release discipline: tests/build/PR/adversarial review happen before release
-- pathology routing: Cigarette, Polyp, and Cancer labels explain blast radius and escalation
-- PD tiers: pick the right workflow depth for the change size and risk
-- OMO-first production review: production adversarial review runs through OhMyOpenCode (OMO), not project-local API keys
+`orev` gives agent-driven development a repeatable release gate:
 
-## Install
+- block secrets before review
+- collect deterministic diff and context artifacts locally
+- review code and UX separately
+- classify findings by spread risk: Cigarette, Polyp, Cancer
+- choose a PD tier based on change risk
+- verify with tests/build before release
 
-```bash
-npm install
-npm run build
-```
+## Two Ways To Use It
 
-For local development:
+### 1. Install The CLI
+
+Use `orev` as a local review artifact engine.
 
 ```bash
-npm test
-npm run build
-```
-
-The package requires Node.js 20 or newer.
-
-## Quick Start
-
-Generate privacy and review artifacts for the current project:
-
-```bash
+npm install -g orev
 orev privacy gate .
 orev diff-scope . --out .orev/diff-scope.json
 orev context . --out .orev/context.json
 orev review . --out /tmp/orev-review.md
 ```
 
-Run the suite workflow by installing the skill files under `skills/` into your agent runtime and invoking:
+The CLI does not call an LLM by default. It creates deterministic local artifacts that an agent or reviewer can inspect.
+
+### 2. Adapt The Workflow
+
+If you already have an agent setup, treat this repo as a workflow reference.
+
+Ask your coding agent:
+
+```text
+Read https://github.com/doul735/orev and adapt the PD workflow to our local AI coding environment.
+Preserve privacy gates, pathology classification, progressive delivery tiers, and evidence-before-completion verification.
+```
+
+Start with:
+
+- [PD Workflow Tiers](./docs/PD_TIERS.md)
+- [Code Pathology Taxonomy](./docs/PATHOLOGY_TAXONOMY.md)
+- [skills/](./skills)
+
+## What Is Included
+
+`orev` has two layers.
+
+| Layer | Purpose |
+|---|---|
+| CLI engine | `privacy gate`, `diff-scope`, `context`, deterministic `review` |
+| Skill suite | `pd1` through `pd9`, `code-review`, `ux-review`, `SUX_review` |
+
+The CLI prepares safe local artifacts. The skills orchestrate review, fixes, tests, pull requests, and final adversarial review.
+
+## PD Release Tiers
+
+| Tier | Use For | Gate |
+|---|---|---|
+| PD 1 | docs, config, one-liners | privacy gate |
+| PD 3 | normal feature or bug fix | code review + type check |
+| PD 5 | medium feature work | SUX review + tests + build |
+| PD 7 | large or high-confidence release | full verification + E2E when needed |
+| PD 9 | auth, payment, security, data migration | Cancer-zero required |
+
+Even-numbered tiers, PD 2/4/6/8, are open slots for community variants.
+
+## Code Pathology
+
+Review findings are classified by spread risk:
+
+| Class | Meaning | Response |
+|---|---|---|
+| Cigarette | Small harmful habit | clean up before it normalizes |
+| Polyp | Localized actionable risk | fix before release |
+| Cancer | Systemic or release-blocking risk | contain, verify, escalate |
+
+This does not replace `MUST-FIX`, `SHOULD-FIX`, or `NIT`. It explains how hard the issue can spread.
+
+## Skill Commands
+
+Install or adapt the skill files under `skills/` into your agent runtime.
 
 ```text
 /pd1          # docs, config, one-liner
 /pd3          # normal feature/bug fix
 /pd5          # medium scope, tests + build
 /pd7          # large scope, full verification
-/pd9          # critical (auth/payment), Cancer-zero required
-```
+/pd9          # critical auth/payment/data/security work
 
-Individual review skills are also available:
-
-```text
 /code-review  # code quality + security
 /ux-review    # UX gap analysis
 /SUX_review   # parallel code + UX review
 ```
 
-## Use With OMO
+Deprecated `ship` and `ship7` templates are kept under `skills/_deprecated/` for migration reference only.
 
-The recommended production path is OMO (OhMyOpenCode):
+## Optional Hosted Review
+
+If OMO, OhMyOpenCode, or another hosted review runtime is available, it can consume `orev` artifacts for adversarial review:
 
 1. `orev` creates privacy-gated local artifacts.
-2. OMO reads those artifacts and the real files selected by the workflow.
-3. GPT-5.5 Pro performs the adversarial review through the OMO subscription-backed runtime.
-4. The skill suite verifies findings, applies selected fixes, and runs tests/build before shipping.
+2. The hosted review runtime reads those artifacts and selected source files.
+3. A stronger review model performs adversarial review through that runtime.
+4. The skill suite verifies findings, applies selected fixes, and runs tests/build before release.
 
-Production OMO reviews do **not** require `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `--model claude` in the target project.
+Hosted review is optional. The deterministic CLI and PD workflow can be used without it.
 
 ## CLI Reference
 
@@ -132,51 +175,19 @@ Useful options:
 When used, the CLI prints:
 
 ```text
-⚠ --ai direct provider is experimental. Production reviews run via OMO (OhMyOpenCode).
+--ai direct provider is experimental. Production reviews run via OMO (OhMyOpenCode).
 ```
 
-The built-in `claude` provider path reads `ANTHROPIC_API_KEY` only when this experimental direct-provider route is explicitly used. Tests do not call real external APIs.
+The built-in `claude` provider path reads `ANTHROPIC_API_KEY` only when this route is explicitly used. Tests do not call real external APIs.
 
-## Architecture
+## Docs
 
-```text
-skills/pd7 (example)
-  -> privacy-gate
-  -> skills/SUX_review
-       -> skills/code-review
-       -> skills/ux-review
-  -> tests/build/E2E
-  -> commit/PR
-  -> OMO GPT-5.5 Pro adversarial review
-
-orev CLI
-  -> privacy gate
-  -> diff-scope artifact
-  -> context manifest
-  -> deterministic report
-```
-
-`orev` stores generated artifacts in `.orev/`. That directory is ignored by git.
-
-## Pathology And PD Tiers
-
-`orev` uses pathology labels to describe spread risk:
-
-- Cigarette: small harmful habit
-- Polyp: localized actionable issue
-- Cancer: systemic or release-blocking issue
-
-PD tiers map that risk to workflow depth:
-
-- PD 1: hygiene pass
-- PD 3: standard review
-- PD 5: ship candidate
-- PD 7: release proof
-- PD 9: full package (Cancer-zero required)
-
-Even-numbered tiers (PD 2, 4, 6, 8) are open slots for community-contributed variants.
-
-See [Code Pathology Taxonomy](./docs/PATHOLOGY_TAXONOMY.md) and [PD Workflow Tiers](./docs/PD_TIERS.md).
+- [Getting Started](./docs/GETTING_STARTED.md)
+- [Adapt This Workflow](./docs/ADAPT_THIS_WORKFLOW.md)
+- [PD Workflow Tiers](./docs/PD_TIERS.md)
+- [Code Pathology Taxonomy](./docs/PATHOLOGY_TAXONOMY.md)
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Acknowledgements](./docs/ACKNOWLEDGEMENTS.md)
 
 ## Development
 
@@ -186,6 +197,12 @@ npm run build
 ```
 
 Generated `dist/` files are ignored in git. They are included in the npm package via the `files` field after `npm run build`.
+
+## Acknowledgements
+
+The implementation and packaging of the core `orev` components are original to this project, including the CLI engine, PD tier model, code pathology taxonomy, and privacy-gated artifact flow.
+
+Some development workflow ideas were influenced by public Claude Code skill projects. See [Acknowledgements](./docs/ACKNOWLEDGEMENTS.md).
 
 ## License
 

@@ -1,19 +1,20 @@
 # Migration Roadmap
 
-This document describes the public migration path from ad-hoc agent review prompts to the `orev` review and ship workflow suite.
+This document describes the public migration path from ad-hoc agent review prompts to the `orev` review and release workflow suite.
 
 ## Goal
 
 Keep the user-facing skill names stable while moving review inputs to deterministic `orev` artifacts.
 
 ```text
-ship7 / ship
+pd5 / pd7 / pd9
   -> SUX_review
        -> code-review
        -> ux-review
-  -> tests/build
+  -> tests/build/E2E as required by tier
+  -> orev review before commit
   -> commit/PR
-  -> OMO GPT-5.5 Pro adversarial review
+  -> optional hosted adversarial review
 
 orev CLI
   -> privacy gate
@@ -24,7 +25,7 @@ orev CLI
 
 ## Production Review Path
 
-Production adversarial review is OMO/OhMyOpenCode subscription-backed orchestration. The target project does not need `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `--model claude` for the default production path.
+Hosted adversarial review can run through OMO/OhMyOpenCode or another external review runtime. The target project does not need `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `--model claude` for the default deterministic workflow.
 
 The direct provider path, `orev review --ai`, remains available only as an experimental/self-hosted fallback.
 
