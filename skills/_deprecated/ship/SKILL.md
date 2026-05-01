@@ -14,7 +14,7 @@ Run a complete shipping workflow for AI-assisted changes.
 2. Run `SUX_review --fix` and apply selected fixes.
 3. Run the project build or type-check command.
 4. Commit on a feature branch and open or update a PR.
-5. Run OMO GPT-5.5 Pro adversarial review using `orev` artifacts:
+5. If available, run hosted adversarial review using `orev` artifacts:
 
    ```bash
    orev privacy gate . --verbose

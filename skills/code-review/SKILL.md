@@ -34,7 +34,7 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
    - performance
    - architecture
 
-5. If OMO is available, run GPT-5.5 Pro adversarial review from the artifacts and source context. Otherwise, perform direct local agent analysis and mark the report as fallback.
+5. If a hosted review runtime is available, run adversarial review from the artifacts and source context. Otherwise, perform direct local agent analysis and mark the report as fallback.
 
 6. Verify each finding against the actual code before reporting it.
 
@@ -51,7 +51,7 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
 
 ### Summary
 - Changed files: N
-- OMO review: success|fallback
+- Hosted review: success|fallback
 - Results: MUST-FIX X, SHOULD-FIX Y, NIT Z
 - Pathology: Cigarette X, Polyp Y, Cancer Z
 
@@ -60,7 +60,7 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
    - Problem: ...
    - Evidence: ...
    - Pathology: Cancer — blast radius / infection path / containment
-   - Source: OMO GPT-5.5 Pro | local verification | static analysis
+   - Source: hosted review | local verification | static analysis
    - Recommendation: ...
 ```
 
