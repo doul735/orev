@@ -1,17 +1,18 @@
 # Migration Roadmap
 
-This document describes the public migration path from ad-hoc agent review prompts to the `orev` review and ship workflow suite.
+This document describes the public migration path from ad-hoc agent review prompts to the `orev` review and release workflow suite.
 
 ## Goal
 
 Keep the user-facing skill names stable while moving review inputs to deterministic `orev` artifacts.
 
 ```text
-ship7 / ship
+pd5 / pd7 / pd9
   -> SUX_review
        -> code-review
        -> ux-review
-  -> tests/build
+  -> tests/build/E2E as required by tier
+  -> orev review before commit
   -> commit/PR
   -> OMO GPT-5.5 Pro adversarial review
 

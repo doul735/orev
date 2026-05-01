@@ -68,13 +68,13 @@ Recommended skills:
 
 Use for ordinary feature work and localized bug fixes.
 
-### PD 5: Ship Candidate
+### PD 5: Release Candidate
 
 Goal: prepare a meaningful change for PR and release.
 
 Recommended skill:
 
-- `ship`
+- `/pd5`
 
 Use when the change needs build/type verification and OMO adversarial review, but executable test depth is not the primary release risk.
 
@@ -84,9 +84,19 @@ Goal: prove important behavior works before release.
 
 Recommended skill:
 
-- `ship7`
+- `/pd7`
 
 Use when correctness must be demonstrated through executable tests, production build checks, and rerun review after fixes.
+
+### PD 9: Full Package
+
+Goal: block critical releases unless security, data, and architecture risk are contained.
+
+Recommended skill:
+
+- `/pd9`
+
+Use for authentication, authorization, payment, billing, encryption, data migration, and infrastructure changes. Cancer findings must be zero before merge.
 
 ## Output Contract
 
@@ -94,7 +104,7 @@ Every tiered review should report:
 
 ```markdown
 ### PD Tier
-- Selected tier: PD 1 | PD 3 | PD 5 | PD 7
+- Selected tier: PD 1 | PD 3 | PD 5 | PD 7 | PD 9
 - Reason: [scope/risk/pathology evidence]
 - Escalation trigger: [if any]
 
