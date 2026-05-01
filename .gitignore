@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.orev/
+.env*
+.envrc
+.npmrc
+.DS_Store
+*.log
+*.local
+tmp/
+docs/internal/
+orev-review.md
