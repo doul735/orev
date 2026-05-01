@@ -27,7 +27,7 @@ orev CLI
 
 Hosted adversarial review can run through OMO/OhMyOpenCode or another external review runtime. The target project does not need `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `--model claude` for the default deterministic workflow.
 
-The direct provider path, `orev review --ai`, remains available only as an experimental/self-hosted fallback.
+The direct provider path, `orev review --ai`, remains experimental/self-hosted supporting evidence only. It is not a PD 5 or PD 7 release-approval fallback; use the independent reviewer setup in `docs/EXTERNAL_REVIEWERS.md` for that gate.
 
 ## Stages
 

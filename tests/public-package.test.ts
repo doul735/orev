@@ -149,7 +149,8 @@ describe("public package documentation", () => {
     expect(pd3).toContain("Polyp 0건이 될 때까지 타입 체크/orev/커밋/PR 단계로 진행하지 않는다");
     expect(pd5).toContain("Cancer 발견 → 즉시 중단");
     expect(pd5).toContain("mandatory escalation");
-    expect(pd5).toContain("테스트/빌드/커밋/PR 단계로 진행하지 않는다");
+    expect(pd5).toContain("PD 5 테스트/빌드/커밋/PR 단계로 진행하지 않는다");
+    expect(pd5).toContain("Cancer-class issue를 수정한 뒤에도 PD 5로 재개하지 말고 PD 7에서 재검증한다");
     expect(pd5).toContain("If the independent reviewer reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7");
     expect(pd5).toContain("Do not continue under PD 5 after fixing a Cancer-class issue");
     expect(pd5).toContain("Polyp 발견 → 현재 패스에서 수정");
@@ -183,6 +184,8 @@ describe("public package documentation", () => {
     expect(reviewerIndex).toBeGreaterThan(-1);
     expect(commitIndex).toBeGreaterThan(-1);
     expect(reviewerIndex).toBeLessThan(commitIndex);
+    expect(roadmap).toContain("not a PD 5 or PD 7 release-approval fallback");
+    expect(roadmap).toContain("docs/EXTERNAL_REVIEWERS.md");
   });
 
   it("presents both install and adapt adoption paths", async () => {

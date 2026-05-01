@@ -38,7 +38,7 @@ orev privacy gate . --verbose
 - 실행 증거를 남긴다. invocation method, changed-files basis, `--fix` 적용 여부를 기록한다.
 - 모든 finding에 Cigarette/Polyp/Cancer 분류
 - legacy: MUST-FIX / SHOULD-FIX / NIT, Quick Win / Major / Nice-to-have 메타데이터는 보조 정보로만 남긴다.
-- Cancer 발견 → 즉시 중단. PD 7로 mandatory escalation을 기록하고, Cancer가 0건이 될 때까지 테스트/빌드/커밋/PR 단계로 진행하지 않는다.
+- Cancer 발견 → 즉시 중단. PD 7로 mandatory escalation을 기록하고, PD 5 테스트/빌드/커밋/PR 단계로 진행하지 않는다. Cancer-class issue를 수정한 뒤에도 PD 5로 재개하지 말고 PD 7에서 재검증한다.
 - Polyp 발견 → 현재 패스에서 수정하고, Polyp 0건이 될 때까지 independent reviewer, tests, build, commit, PR 단계로 진행하지 않는다.
 - Cigarette 발견은 현재 패스에서 수정하고, 보고서에 cycle evidence, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation을 남긴다.
 
