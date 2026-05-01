@@ -22,7 +22,7 @@ describe("public package documentation", () => {
   });
 
   it("keeps active PD skills on installed orev CLI syntax", async () => {
-    const activeSkills = ["pd1", "pd3", "pd5", "pd7", "pd9"];
+    const activeSkills = ["pd1", "pd3", "pd5", "pd7"];
     for (const skill of activeSkills) {
       const content = await readProjectFile(`skills/${skill}/SKILL.md`);
       expect(content).not.toContain("node orev");
@@ -31,7 +31,7 @@ describe("public package documentation", () => {
   });
 
   it("runs orev review before commit in PD release skills", async () => {
-    const releaseSkills = ["pd3", "pd5", "pd7", "pd9"];
+    const releaseSkills = ["pd3", "pd5", "pd7"];
     for (const skill of releaseSkills) {
       const content = await readProjectFile(`skills/${skill}/SKILL.md`);
       const reviewIndex = content.indexOf("orev review . --out");
@@ -48,7 +48,16 @@ describe("public package documentation", () => {
     expect(tiers).not.toContain("- `ship7`");
     expect(tiers).toContain("- `/pd5`");
     expect(tiers).toContain("- `/pd7`");
-    expect(tiers).toContain("Selected tier: PD 1 | PD 3 | PD 5 | PD 7 | PD 9");
+    expect(tiers).toContain("Selected tier: PD 1 | PD 3 | PD 5 | PD 7");
+    expect(tiers).toContain("PD 9: Reserved Slot");
+  });
+
+  it("reserves PD 9 instead of making it a default release workflow", async () => {
+    const pd9 = await readProjectFile("skills/pd9/SKILL.md");
+
+    expect(pd9).toContain("reserved");
+    expect(pd9).not.toContain("orev review . --out");
+    expect(pd9).not.toContain("orev privacy gate . --verbose");
   });
 
   it("presents both install and adapt adoption paths", async () => {
