@@ -58,7 +58,7 @@ The project has two parts.
 
 The first is a CLI engine. It creates deterministic local artifacts: a privacy gate, a diff-scope artifact, a bounded context manifest, and a review report. The CLI does not call an LLM by default. Its job is to make review inputs safer and inspectable.
 
-The second is a skill suite. The PD series, PD 1 through PD 9, maps change risk to verification depth. A docs change should not need the same process as a payment or authentication change. A large release candidate should not be treated like a typo fix.
+The second is a skill suite. The default PD series, PD 1 / 3 / 5 / 7, maps change risk to verification depth, while PD 9 is reserved for custom variants. A docs change should not need the same process as a payment or authentication change. A large release candidate should not be treated like a typo fix.
 
 The tiers are simple:
 
@@ -150,7 +150,7 @@ AI 코딩 에이전트는 소프트웨어 개발 속도를 바꿨습니다. diff
 
 첫 번째는 CLI engine입니다. privacy gate, diff-scope artifact, bounded context manifest, deterministic review report를 로컬에서 생성합니다. 기본적으로 LLM을 호출하지 않습니다. 목적은 리뷰 입력을 안전하고 검증 가능하게 만드는 것입니다.
 
-두 번째는 skill suite입니다. PD 1부터 PD 9까지의 PD 시리즈는 변경 위험도에 따라 검증 깊이를 다르게 가져갑니다. 문서 수정과 결제 로직 변경이 같은 과정을 거치면 안 됩니다. 대규모 릴리즈 후보를 오타 수정처럼 다루면 안 됩니다.
+두 번째는 skill suite입니다. 기본 PD 시리즈인 PD 1 / 3 / 5 / 7은 변경 위험도에 따라 검증 깊이를 다르게 가져가고, PD 9는 custom variant 슬롯으로 남깁니다. 문서 수정과 결제 로직 변경이 같은 과정을 거치면 안 됩니다. 대규모 릴리즈 후보를 오타 수정처럼 다루면 안 됩니다.
 
 단계는 단순합니다.
 

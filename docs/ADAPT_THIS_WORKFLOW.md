@@ -15,7 +15,7 @@ Preserve these core ideas:
 - privacy-gated context before review
 - deterministic diff and context artifacts
 - separate code review and UX review
-- PD 1/3/5/7/9 release tiers
+- PD 1/3/5/7 default release tiers, with PD 9 reserved for custom variants
 - Cigarette/Polyp/Cancer pathology classification
 - evidence-before-completion verification
 

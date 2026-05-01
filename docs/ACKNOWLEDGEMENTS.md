@@ -24,7 +24,7 @@ The following are original to this project:
 
 - **orev CLI**: privacy gate, diff-scope, context manifest, deterministic review report
 - **Code Pathology Taxonomy**: Cigarette / Polyp / Cancer classification with blast radius, infection path, and containment
-- **PD Tier System**: PD 1 / 3 / 5 / 7 / 9 workflow depth tiers with pathology-based escalation
+- **PD Tier System**: PD 1 / 3 / 5 / 7 workflow depth tiers with pathology-based escalation, plus reserved custom variant slots such as PD 9
 - **Privacy Gate**: ALLOW / REDACT / SUMMARIZE / BLOCK four-level decision system
-- **Hosted review integration**: optional adversarial review using external review runtimes
+- **Independent review integration**: mandatory adversarial review for PD 5 and PD 7 using external review runtimes or independent reviewer models
 - **SUX_review**: parallel code + UX review orchestration

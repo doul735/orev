@@ -60,6 +60,39 @@ describe("public package documentation", () => {
     expect(pd9).not.toContain("orev privacy gate . --verbose");
   });
 
+  it("keeps packaged docs aligned with the PD 9 reserved-slot contract", async () => {
+    const packagedDocs = [
+      "README.md",
+      "docs/ACKNOWLEDGEMENTS.md",
+      "docs/ADAPT_THIS_WORKFLOW.md",
+      "docs/ARCHITECTURE.md",
+      "docs/GETTING_STARTED.md",
+      "docs/MIGRATION_ROADMAP.md",
+      "docs/PATHOLOGY_TAXONOMY.md",
+      "docs/PD_TIERS.md",
+      "docs/SHIP_PD_OPENSOURCE.md"
+    ];
+
+    for (const doc of packagedDocs) {
+      const content = await readProjectFile(doc);
+      expect(content).not.toContain("PD 1/3/5/7/9 release tiers");
+      expect(content).not.toContain("PD 1 / 3 / 5 / 7 / 9 workflow depth tiers");
+      expect(content).not.toContain("optional adversarial review");
+      expect(content).not.toContain("optional hosted adversarial review");
+    }
+  });
+
+  it("keeps PD5 and PD7 independent-review approval explicit", async () => {
+    const pd5 = await readProjectFile("skills/pd5/SKILL.md");
+    const pd7 = await readProjectFile("skills/pd7/SKILL.md");
+
+    for (const content of [pd5, pd7]) {
+      expect(content).toContain("independent reviewer");
+      expect(content).toContain("do not count as release approval");
+      expect(content).toContain("cross-model review unavailable");
+    }
+  });
+
   it("presents both install and adapt adoption paths", async () => {
     const readme = await readProjectFile("README.md");
 

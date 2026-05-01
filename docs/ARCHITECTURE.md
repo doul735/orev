@@ -18,7 +18,7 @@ The skill suite orchestrates agent work:
 - `code-review`: security and code-quality review
 - `ux-review`: product and UX gap review
 - `SUX_review`: parallel integrated review
-- `pd1` through `pd9`: release workflows with escalating verification depth
+- `pd1`, `pd3`, `pd5`, `pd7`: default release workflows with escalating verification depth
 - `pd1`: privacy gate + commit, with current-pass Cigarette cleanup for hygiene changes
 - `pd3`: code-review + type check + orev review (normal features)
 - `pd5`: SUX_review + tests + build + orev review (medium scope)
