@@ -1,6 +1,6 @@
 # Acknowledgements
 
-orev draws inspiration and incorporates ideas from several open-source projects.
+orev draws inspiration from several open-source projects.
 
 ## Direct Influences
 
@@ -26,5 +26,5 @@ The following are original to this project:
 - **Code Pathology Taxonomy**: Cigarette / Polyp / Cancer classification with blast radius, infection path, and containment
 - **PD Tier System**: PD 1 / 3 / 5 / 7 / 9 workflow depth tiers with pathology-based escalation
 - **Privacy Gate**: ALLOW / REDACT / SUMMARIZE / BLOCK four-level decision system
-- **OMO integration**: subscription-based adversarial review without per-call API costs
+- **Hosted review integration**: optional adversarial review using external review runtimes
 - **SUX_review**: parallel code + UX review orchestration

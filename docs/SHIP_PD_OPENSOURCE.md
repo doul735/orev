@@ -45,7 +45,7 @@ Publish these components together:
 - block secrets before AI review
 - keep code review and UX review separate
 - run tests/builds before merge
-- use OMO for production adversarial review
+- support optional hosted adversarial review
 - keep direct provider/API review experimental and self-hosted
 
 ## Repository Shape
