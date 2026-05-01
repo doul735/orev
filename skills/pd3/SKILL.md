@@ -21,7 +21,7 @@ argument-hint: "[선택: 커밋 메시지 힌트]"
 ### Step 1: Privacy Gate
 
 ```bash
-node orev privacy gate . --verbose
+orev privacy gate . --verbose
 ```
 
 BLOCK 시 즉시 중단.
@@ -41,24 +41,24 @@ pnpm run check
 
 실패 시 수정 → 재실행 (최대 2회).
 
-### Step 4: Commit & PR
+### Step 4: orev 리뷰 (커밋 전)
 
-`/commit` 스킬을 실행한다.
-
-### Step 5: orev 리뷰 (OMO)
-
-orev artifact를 생성하고 OMO에서 적대적 리뷰를 수행한다.
+orev artifact를 생성한다. **반드시 커밋 전에 실행** — 커밋 후에는 diff가 비어서 리뷰 불가.
 
 ```bash
 TMP_DIR=$(mktemp -d /tmp/orev-pd3-review.XXXXXX)
-node orev review . --out "$TMP_DIR/pd3-review.md" --verbose
+orev review . --out "$TMP_DIR/pd3-review.md" --verbose
 ```
 
 보고서를 Read로 읽고 findings를 확인한다.
-- MUST-FIX/SHOULD-FIX → 수정 → push → 재리뷰 (최대 2회)
-- NIT만 또는 클린 → 머지 진행
+- MUST-FIX/SHOULD-FIX → 수정 → Step 4 재실행 (최대 2회)
+- NIT만 또는 클린 → Step 5로 진행
 
 orev 실패 시 Claude Code 직접 분석 fallback.
+
+### Step 5: Commit & PR
+
+`/commit` 스킬을 실행한다.
 
 ### Verification
 
@@ -66,8 +66,8 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 - [ ] privacy gate ALLOW
 - [ ] code-review 실행 + finding 수정 완료
 - [ ] tsc 통과
-- [ ] PR 생성됨
 - [ ] orev 리뷰 완료
+- [ ] PR 생성됨
 
 ## 보고서
 

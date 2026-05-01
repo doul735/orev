@@ -21,7 +21,7 @@ argument-hint: "[선택: 커밋 메시지 힌트]"
 ### Step 1: Privacy Gate
 
 ```bash
-node orev privacy gate . --verbose
+orev privacy gate . --verbose
 ```
 
 BLOCK 시 즉시 중단. 사용자에게 보고.
