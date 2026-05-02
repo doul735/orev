@@ -10,7 +10,7 @@ After PR creation and before merge, trigger or wait for the official GitHub Code
 
 ```bash
 gh pr view <PR> --comments --reviews
-gh api repos/<owner>/<repo>/pulls/<PR>/comments
+gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate
 ```
 
 Required evidence:
@@ -29,6 +29,18 @@ Rules:
 - If the PR head changed after Codex review, rerun or retrigger Codex before merge.
 - If GitHub Codex is unavailable, not installed, or cannot be inspected, PD 5 and PD 7 stop with `[blocked] post-PR Codex review unavailable`.
 - Do not downgrade to Claude Code self-review, local direct analysis, deterministic `orev review`, or Codex CLI preflight.
+
+## Codex Review Loop Limit
+
+PD 5 and PD 7 use a bounded Codex review/fix loop.
+
+- Default maximum: 3 Codex review cycles.
+- A cycle means: Codex review → classify findings → fix required findings → rerun required verification → push or retrigger Codex.
+- If the first 3 cycles are Cigarette-only, stop the loop after documenting cleanup attempts, remaining Cigarette risk, and zero open Cancer/Polyp.
+- If cycle 3 reports any Polyp or Cancer, allow exactly 1 extra cycle after fixes.
+- If cycle 4 still reports Polyp or Cancer, block release and require a human decision.
+- Open Cancer or Polyp is never mergeable.
+- Any tracked-file fix invalidates prior SUX_review counts and deterministic `orev review` artifacts.
 
 ## Supporting Path: OpenAI Codex CLI Preflight
 

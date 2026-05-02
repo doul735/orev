@@ -27,12 +27,21 @@ Operational mistakes that caused repeated PD workflow failures. Keep this file t
 - After PR creation and before merge, inspect official GitHub Codex reviewer/plugin output.
 - Run both:
   - `gh pr view <PR> --comments --reviews`
-  - `gh api repos/<owner>/<repo>/pulls/<PR>/comments`
+  - `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate`
 - Classify every Codex inline comment as Cancer, Polyp, or Cigarette.
 - Treat Codex P2 or higher as at least Polyp.
 - Open Polyp or Cancer blocks merge.
 - Fixes require a new commit, fresh applicable verification, and found/fixed/open counts in the PR body or comment.
 - Claude Code self-review, SUX_review, Codex CLI preflight, and deterministic `orev review` do not replace this post-PR GitHub Codex gate.
+
+## Codex Review Loop Limit
+
+- Default maximum: 3 Codex review cycles.
+- A cycle is Codex review → classify findings → fix required findings → rerun required verification → push or retrigger Codex.
+- If the first 3 cycles are Cigarette-only, stop after documenting cleanup attempts, remaining Cigarette risk, and zero open Cancer/Polyp.
+- If cycle 3 reports any Polyp or Cancer, allow exactly 1 extra cycle after fixes.
+- If cycle 4 still reports Polyp or Cancer, block release and require a human decision.
+- Open Cancer or Polyp is never mergeable.
 
 ## Secret Or Credential Accidents
 
