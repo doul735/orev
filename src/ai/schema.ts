@@ -62,40 +62,11 @@ function isPathology(value: unknown): value is PathologyClass {
   return typeof value === "string" && pathologies.includes(value as PathologyClass);
 }
 
-function pathologyFromSeverity(severity: AiReviewSeverity): PathologyClass {
-  if (severity === "critical") {
-    return "Cancer";
-  }
-  if (severity === "error" || severity === "warning") {
-    return "Polyp";
-  }
-  return "Cigarette";
-}
-
 function countsForFindings(findings: Array<{ pathology: PathologyClass }>): PathologyCounts {
   return findings.reduce<PathologyCounts>((counts, finding) => {
     counts[finding.pathology] += 1;
     return counts;
   }, { Cancer: 0, Polyp: 0, Cigarette: 0 });
-}
-
-function parsePathologyCounts(value: unknown): PathologyCounts | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-  const counts: Partial<PathologyCounts> = {};
-  for (const pathology of pathologies) {
-    const count = value[pathology];
-    if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
-      return undefined;
-    }
-    counts[pathology] = count;
-  }
-  return counts as PathologyCounts;
-}
-
-function countsMatch(expected: PathologyCounts, actual: PathologyCounts): boolean {
-  return pathologies.every((pathology) => expected[pathology] === actual[pathology]);
 }
 
 function isUxLens(value: unknown): value is UxReviewLens {
@@ -117,7 +88,7 @@ function parseDimension(value: unknown): AiDimensionSummary | undefined {
   };
 }
 
-function parseFinding(value: unknown, allowLegacyPathology: boolean): AiFinding | undefined {
+function parseFinding(value: unknown): AiFinding | undefined {
   if (!isRecord(value)
     || !isDimension(value.dimension)
     || !isSeverity(value.severity)
@@ -136,13 +107,13 @@ function parseFinding(value: unknown, allowLegacyPathology: boolean): AiFinding 
   if (value.line !== undefined && (typeof value.line !== "number" || !Number.isInteger(value.line) || value.line <= 0)) {
     return undefined;
   }
-  const pathology = isPathology(value.pathology) ? value.pathology : allowLegacyPathology ? pathologyFromSeverity(value.severity) : undefined;
+  const pathology = isPathology(value.pathology) ? value.pathology : undefined;
   if (pathology === undefined) {
     return undefined;
   }
-  const blastRadius = isString(value.blastRadius) ? value.blastRadius : allowLegacyPathology ? "Derived from legacy schema v1 severity metadata." : undefined;
-  const infectionPath = isString(value.infectionPath) ? value.infectionPath : allowLegacyPathology ? "Legacy schema v1 did not provide infection path details." : undefined;
-  const containment = isString(value.containment) ? value.containment : allowLegacyPathology ? value.recommendation : undefined;
+  const blastRadius = isString(value.blastRadius) ? value.blastRadius : undefined;
+  const infectionPath = isString(value.infectionPath) ? value.infectionPath : undefined;
+  const containment = isString(value.containment) ? value.containment : undefined;
   if (blastRadius === undefined || infectionPath === undefined || containment === undefined) {
     return undefined;
   }
@@ -168,7 +139,7 @@ function parseFinding(value: unknown, allowLegacyPathology: boolean): AiFinding 
 }
 
 function parseCodeReview(parsed: unknown): AiReviewSuccess {
-  if (!isRecord(parsed) || (parsed.schemaVersion !== 2 && parsed.schemaVersion !== 1) || !isRisk(parsed.overallRisk) || !isString(parsed.summary)) {
+  if (!isRecord(parsed) || parsed.schemaVersion !== 2 || !isRisk(parsed.overallRisk) || !isString(parsed.summary)) {
     throw new Error("AI response schema mismatch");
   }
   if (!Array.isArray(parsed.dimensions) || parsed.dimensions.length !== aiDimensions.length) {
@@ -186,21 +157,12 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
   if (!Array.isArray(parsed.findings)) {
     throw new Error("AI response findings must be an array");
   }
-  const allowLegacyPathology = parsed.schemaVersion === 1;
-  const findings = parsed.findings.map((finding) => parseFinding(finding, allowLegacyPathology));
+  const findings = parsed.findings.map(parseFinding);
   if (findings.some((finding) => finding === undefined)) {
     throw new Error("AI response contains an invalid finding");
   }
   const typedFindings = findings.filter((finding): finding is AiFinding => finding !== undefined);
-  const derivedCounts = countsForFindings(typedFindings);
-  const suppliedCounts = parsePathologyCounts(parsed.pathologyCounts);
-  let pathologyCounts = derivedCounts;
-  if (parsed.schemaVersion === 2) {
-    if (suppliedCounts === undefined || !countsMatch(suppliedCounts, derivedCounts)) {
-      throw new Error("AI response pathology counts do not match findings");
-    }
-    pathologyCounts = suppliedCounts;
-  }
+  const pathologyCounts = countsForFindings(typedFindings);
 
   return {
     mode: "code",
@@ -278,12 +240,7 @@ function parseUxReview(parsed: unknown): UxReviewSuccess {
     throw new Error("AI UX response contains an invalid finding");
   }
   const typedFindings = findings.filter((finding): finding is UxFinding => finding !== undefined);
-  const derivedCounts = countsForFindings(typedFindings);
-  const suppliedCounts = parsePathologyCounts(parsed.pathologyCounts);
-  if (suppliedCounts === undefined || !countsMatch(suppliedCounts, derivedCounts)) {
-    throw new Error("AI UX response pathology counts do not match findings");
-  }
-  const pathologyCounts = suppliedCounts;
+  const pathologyCounts = countsForFindings(typedFindings);
 
   return {
     mode: "ux",

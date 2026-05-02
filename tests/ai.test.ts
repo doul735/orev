@@ -401,7 +401,7 @@ describe("AI review orchestration", () => {
     expect(markdown).toContain("AI response schema mismatch");
   });
 
-  it("fails closed when schema v2 pathology counts are omitted", async () => {
+  it("derives pathology counts when schema v2 summary counts are omitted", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 52;\n");
     const parsed = JSON.parse(successResponse()) as Record<string, unknown>;
@@ -428,12 +428,12 @@ describe("AI review orchestration", () => {
       }
     });
 
-    expect(result.ai?.status).toBe("failed");
-    expect(result.ai?.review).toBeUndefined();
-    expect(markdown).toContain("AI response pathology counts do not match findings");
+    expect(result.ai?.status).toBe("success");
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 1, Cigarette: 0 });
+    expect(markdown).toContain("- Polyp: 1");
   });
 
-  it("fails closed when schema v2 pathology counts disagree with findings", async () => {
+  it("derives pathology counts when schema v2 summary counts disagree with findings", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 56;\n");
     const parsed = JSON.parse(successResponse()) as Record<string, unknown>;
@@ -460,9 +460,9 @@ describe("AI review orchestration", () => {
       }
     });
 
-    expect(result.ai?.status).toBe("failed");
-    expect(result.ai?.review).toBeUndefined();
-    expect(markdown).toContain("AI response pathology counts do not match findings");
+    expect(result.ai?.status).toBe("success");
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 1, Cigarette: 0 });
+    expect(markdown).toContain("- Polyp: 1");
   });
 
   it("fails closed when schema v2 findings omit canonical pathology fields", async () => {
@@ -498,7 +498,7 @@ describe("AI review orchestration", () => {
     expect(markdown).toContain("AI response contains an invalid finding");
   });
 
-  it("accepts legacy schema v1 code provider responses and derives pathology fields", async () => {
+  it("fails closed for legacy schema v1 code provider responses", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 53;\n");
     const provider = new FakeProvider(legacyCodeSuccessResponse());
@@ -523,13 +523,12 @@ describe("AI review orchestration", () => {
       }
     });
 
-    expect(result.ai?.status).toBe("success");
-    expect(result.ai?.review?.schemaVersion).toBe(2);
-    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 0, Cigarette: 1 });
-    expect(markdown).toContain("Derived from legacy schema v1 severity metadata.");
+    expect(result.ai?.status).toBe("failed");
+    expect(result.ai?.review).toBeUndefined();
+    expect(markdown).toContain("AI response schema mismatch");
   });
 
-  it("ignores raw pathology counts on legacy schema v1 code provider responses", async () => {
+  it("fails closed for legacy schema v1 code provider responses with raw pathology counts", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 57;\n");
     const parsed = JSON.parse(legacyCodeSuccessResponse()) as Record<string, unknown>;
@@ -556,9 +555,9 @@ describe("AI review orchestration", () => {
       }
     });
 
-    expect(result.ai?.status).toBe("success");
-    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 0, Cigarette: 1 });
-    expect(markdown).toContain("- Cigarette: 1");
+    expect(result.ai?.status).toBe("failed");
+    expect(result.ai?.review).toBeUndefined();
+    expect(markdown).toContain("AI response schema mismatch");
   });
 
   it("fails closed for legacy schema v1 UX provider responses", async () => {
