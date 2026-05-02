@@ -137,6 +137,7 @@ describe("public package documentation", () => {
       expect(content).toContain("If the independent reviewer reports Cigarette-only findings");
       expect(content).toContain("tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact");
       expect(content).toContain("reviewer-driven tracked-file fixes는 SUX_review");
+      expect(content).toContain("after 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp");
     }
 
     expect(architecture).toContain("`pd5`: SUX_review + independent reviewer + tests + build + orev review");
