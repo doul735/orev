@@ -15,15 +15,16 @@ Run the review against the same final diff used for the PR. Resolve and record t
 
 ```bash
 mkdir -p handoff
+PATCH_ID=$(git diff --binary | shasum -a 256 | cut -d ' ' -f 1)
 codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
-  -o handoff/pd-review-<head-sha>.md \
-  --title "PD external review for <base-sha>...<head-sha>" \
-  > handoff/pd-review-<head-sha>.jsonl
+  -o handoff/pd-review-${PATCH_ID}.md \
+  --title "PD external review for <base-sha> + uncommitted patch ${PATCH_ID}" \
+  > handoff/pd-review-${PATCH_ID}.jsonl
 ```
 
 Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts are durable release evidence, but they are not part of the reviewed source diff.
 
-If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and record the clean worktree snapshot or patch artifact that was reviewed.
+If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and record the patch hash or patch artifact that was reviewed.
 
 The receipt must include or preserve:
 

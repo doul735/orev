@@ -77,12 +77,12 @@ pnpm run build
 # UI/browser/auth/payment/data-security end-to-end surface exists:
 pnpm test:e2e
 
-# Otherwise run the strongest applicable executable proof:
-pnpm test
-# or: pnpm test:integration / pnpm test:contract / API smoke / migration dry-run / CLI driver script
+# Otherwise run the strongest applicable proof beyond the unit test pass:
+pnpm test:integration
+# or: pnpm test:contract / API smoke / migration dry-run / CLI driver script
 ```
 
-E2E는 사용자 여정, UI, browser-visible flow, auth/payment/data/security 경계가 실제 end-to-end surface를 갖는 경우 필수 실행한다. API, library, backend service처럼 E2E suite가 없는 프로젝트는 `pnpm test:e2e`를 실행하지 않고 equivalent executable coverage를 선택해 실행하고 증거를 남긴다. 예: integration tests, contract tests, API smoke tests, migration dry-run, CLI/library driver script. 해당 변경에 맞는 equivalent coverage도 없으면 `[blocked] executable proof unavailable`로 중단하거나 사용자 승인 기반 예외를 명시한다.
+E2E는 사용자 여정, UI, browser-visible flow, auth/payment/data/security 경계가 실제 end-to-end surface를 갖는 경우 필수 실행한다. API, library, backend service처럼 E2E suite가 없는 프로젝트는 `pnpm test:e2e`를 실행하지 않고 Step 4-1의 unit test pass보다 강한 equivalent executable coverage를 선택해 실행하고 증거를 남긴다. 예: integration tests, contract tests, API smoke tests, migration dry-run, CLI/library driver script. 해당 변경에 맞는 stronger-than-unit-test coverage도 없으면 `[blocked] executable proof unavailable`로 중단하거나 사용자 승인 기반 예외를 명시한다.
 
 ### Step 5: 아키텍처 영향 점검
 
