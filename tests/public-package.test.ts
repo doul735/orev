@@ -92,6 +92,8 @@ describe("public package documentation", () => {
     expect(externalReviewers).toContain("OpenAI Codex CLI");
     expect(externalReviewers).toContain("record the base SHA");
     expect(externalReviewers).toContain("PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX)");
+    expect(externalReviewers).toContain("git diff --binary HEAD > \"$PATCH_TMP\"");
+    expect(externalReviewers).toContain("final worktree snapshot against `HEAD`");
     expect(externalReviewers).toContain("PATCH_ARTIFACT=\"handoff/pd-review-${PATCH_ID}.patch\"");
     expect(externalReviewers).toContain("do not edit files between generating `${PATCH_ARTIFACT}` and running Codex");
     expect(externalReviewers).toContain("codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json");
