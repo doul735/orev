@@ -28,7 +28,7 @@ Quick Win is effort metadata, not a risk class. Do not map it directly to Cigare
 
 ### Cigarette Stop Rule
 
-Count review/fix cycles, not finding count. A cycle counts toward the Cigarette stop streak only when the review report contains Cigarette findings and zero Cancer or Polyp findings, all Cigarette findings are fixed in the current pass, reasonable cleanup was attempted, and evidence is documented. After 3 consecutive Cigarette-only review/fix cycles, stop the loop. Any Cancer or Polyp finding is outside this stop rule, resets the Cigarette-only streak, and follows normal containment or fix-before-release routing.
+Count review/fix cycles, not finding count. A cycle counts toward the Cigarette stop streak only when the review report contains Cigarette findings and zero Cancer or Polyp findings, all Cigarette findings are fixed in the current pass, reasonable cleanup was attempted, and evidence is documented. If the next review is clean, the cleanup loop terminates successfully and the workflow continues. If the next review still contains Cigarette-only findings, start the next cycle. After 3 consecutive Cigarette-only review/fix cycles, stop the loop and report the remaining Cigarette risk instead of chasing diminishing returns. Any Cancer or Polyp finding is outside this stop rule, resets the Cigarette-only streak, and follows normal containment or fix-before-release routing.
 
 ### Polyp
 

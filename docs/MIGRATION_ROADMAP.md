@@ -11,9 +11,9 @@ pd5 / pd7
   -> SUX_review
        -> code-review
        -> ux-review
-  -> mandatory independent adversarial review for PD 5/7
   -> tests/build/E2E as required by tier
   -> orev review before commit
+  -> mandatory independent adversarial review for PD 5/7 against final diff + orev artifacts
   -> commit/PR
 
 orev CLI
@@ -66,7 +66,7 @@ The direct provider path, `orev review --ai`, remains experimental/self-hosted s
 
 - Classify review findings as Cancer, Polyp, or Cigarette.
 - Use pathology to explain blast radius, infection path, and containment.
-- For Cigarette findings, fix them in the current pass and document the review/fix cycle evidence. Stop only after 3 consecutive Cigarette-only cycles with zero Cancer and zero Polyp findings.
+- For Cigarette findings, fix them in the current pass and document the review/fix cycle evidence. A clean rerun terminates the loop successfully; stop only after 3 consecutive Cigarette-only cycles with zero Cancer and zero Polyp findings when Cigarette findings keep recurring.
 - Route workflow depth through PD 1, PD 3, PD 5, or PD 7.
 
 ### 7. PD Release Tiers
