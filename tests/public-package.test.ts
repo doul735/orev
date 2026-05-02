@@ -94,10 +94,14 @@ describe("public package documentation", () => {
     expect(externalReviewers).toContain("PD 5 and PD 7 require an official post-PR GitHub Codex reviewer/plugin merge gate");
     expect(externalReviewers).toContain("PD 3 does not require Codex by default");
     expect(externalReviewers).toContain("gh pr view <PR> --comments --reviews");
-    expect(externalReviewers).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments");
+    expect(externalReviewers).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate");
     expect(externalReviewers).toContain("Codex P2 or higher is at least Polyp");
     expect(externalReviewers).toContain("[blocked] post-PR Codex review unavailable");
     expect(externalReviewers).toContain("Do not downgrade to Claude Code self-review");
+    expect(externalReviewers).toContain("Default maximum: 3 Codex review cycles");
+    expect(externalReviewers).toContain("If cycle 3 reports any Polyp or Cancer, allow exactly 1 extra cycle after fixes");
+    expect(externalReviewers).toContain("If cycle 4 still reports Polyp or Cancer, block release and require a human decision");
+    expect(externalReviewers).toContain("Open Cancer or Polyp is never mergeable");
     expect(externalReviewers).toContain("OpenAI Codex CLI");
     expect(externalReviewers).toContain("record the base SHA");
     expect(externalReviewers).toContain("If the repository has no `HEAD` yet");
@@ -161,9 +165,15 @@ describe("public package documentation", () => {
       expect(content).toContain("post-PR Codex review unavailable");
       expect(content).toContain("open Codex Cancer and Polyp counts are 0");
       expect(content).toContain("If Codex reports Cigarette-only findings");
+      expect(content).toContain("fix them in the current pass");
+      expect(content).not.toContain("when practical");
       expect(content).toContain("tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact");
       expect(content).toContain("Codex-driven tracked-file fixes는 SUX_review");
-      expect(content).toContain("After 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp");
+      expect(content).toContain("run up to 3 review/fix cycles by default");
+      expect(content).toContain("if the first 3 cycles are Cigarette-only");
+      expect(content).toContain("if cycle 3 reports any Polyp or Cancer, allow exactly 1 extra cycle after fixes");
+      expect(content).toContain("if cycle 4 still reports Polyp or Cancer, block release and require a human decision");
+      expect(content).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate");
     }
 
     expect(architecture).toContain("`pd5`: SUX_review + tests + build + orev review + post-PR GitHub Codex gate");
@@ -240,7 +250,9 @@ describe("public package documentation", () => {
     expect(gotchas).toContain("Polyp Is Not Cigarette");
     expect(gotchas).toContain("The post-PR GitHub Codex merge gate is mandatory for PD 5 and PD 7 only");
     expect(gotchas).toContain("PD 3 does not require Codex by default");
-    expect(gotchas).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments");
+    expect(gotchas).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate");
+    expect(gotchas).toContain("Default maximum: 3 Codex review cycles");
+    expect(gotchas).toContain("If cycle 4 still reports Polyp or Cancer, block release and require a human decision");
   });
 
   it("presents both install and adapt adoption paths", async () => {

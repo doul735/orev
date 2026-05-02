@@ -85,13 +85,14 @@ Mandatory merge gate for PD 5. This gate runs after PR creation and before merge
 
 ```bash
 gh pr view <PR> --comments --reviews
-gh api repos/<owner>/<repo>/pulls/<PR>/comments
+gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate
 ```
 
 - Classify every GitHub Codex inline comment as Cancer, Polyp, or Cigarette. Treat Codex P2 or higher as at least Polyp.
 - If Codex reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7. Do not continue under PD 5 after fixing a Cancer-class issue.
 - If Codex reports Polyp findings, fix them, push a new commit, rerun SUX_review, tests/build/orev as applicable, and rerun or retrigger this post-PR Codex gate. PD 5 may merge only when open Codex Cancer and Polyp counts are 0.
-- If Codex reports Cigarette-only findings, fix them in the current pass when practical. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before the Codex gate is accepted. After 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp, stop the loop and report remaining Cigarette risk instead of blocking release indefinitely.
+- If Codex reports Cigarette-only findings, fix them in the current pass. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before the Codex gate is accepted.
+- Codex review loops are bounded: run up to 3 review/fix cycles by default; if the first 3 cycles are Cigarette-only, stop after documenting cleanup attempts, remaining Cigarette risk, and zero open Cancer/Polyp; if cycle 3 reports any Polyp or Cancer, allow exactly 1 extra cycle after fixes; if cycle 4 still reports Polyp or Cancer, block release and require a human decision.
 - Record found/fixed/open counts and the fixing commit SHA in the PR body or PR comment before merge.
 - If GitHub Codex is unavailable, not installed, or cannot be inspected, stop with `[blocked] post-PR Codex review unavailable`. Do not downgrade to self-review.
 
@@ -109,7 +110,7 @@ gh api repos/<owner>/<repo>/pulls/<PR>/comments
 - [ ] orev 결정론적 gate 완료, clean artifact path 기록
 - [ ] /commit skill 또는 command invocation 증거
 - [ ] PR 생성됨
-- [ ] post-PR GitHub Codex gate 실행 증거 (`gh pr view --comments --reviews`, `gh api repos/<owner>/<repo>/pulls/<PR>/comments`)
+- [ ] post-PR GitHub Codex gate 실행 증거 (`gh pr view --comments --reviews`, `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate`)
 - [ ] Codex-reviewed commit SHA가 최신 PR head SHA와 일치하거나 gate 재실행 완료
 - [ ] Codex Cancer 0 / open Polyp 0 확인, Codex-driven tracked-file fixes는 SUX_review/tests/build/orev/Codex 재검증 완료
 - [ ] PR body/comment에 Codex found/fixed/open counts와 fixing commit SHA 기록
