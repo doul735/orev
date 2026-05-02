@@ -11,17 +11,19 @@ npm install -g @openai/codex
 codex login
 ```
 
-Run the review against the same immutable diff used for the PR. Resolve and record the base SHA first; do not rely on a moving branch ref for release evidence.
+Run the review against the same final diff used for the PR. Resolve and record the base SHA first; do not rely on a moving branch ref for release evidence. For the normal PD 5/7 pre-commit gate, include uncommitted tracked changes in the reviewed scope.
 
 ```bash
 mkdir -p handoff
-codex exec review --base <base-sha> --model gpt-5.4 --json \
+codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
   -o handoff/pd-review-<head-sha>.md \
   --title "PD external review for <base-sha>...<head-sha>" \
   > handoff/pd-review-<head-sha>.jsonl
 ```
 
 Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts are durable release evidence, but they are not part of the reviewed source diff.
+
+If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and record the clean worktree snapshot or patch artifact that was reviewed.
 
 The receipt must include or preserve:
 

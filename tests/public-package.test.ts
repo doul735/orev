@@ -91,7 +91,7 @@ describe("public package documentation", () => {
 
     expect(externalReviewers).toContain("OpenAI Codex CLI");
     expect(externalReviewers).toContain("record the base SHA");
-    expect(externalReviewers).toContain("codex exec review --base <base-sha> --model gpt-5.4 --json");
+    expect(externalReviewers).toContain("codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json");
     expect(externalReviewers).toContain("durable artifact path");
     expect(pd5).toContain("docs/EXTERNAL_REVIEWERS.md");
     expect(pd7).toContain("docs/EXTERNAL_REVIEWERS.md");
