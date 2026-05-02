@@ -15,21 +15,24 @@ Run the review against the same final diff used for the PR. Resolve and record t
 
 ```bash
 mkdir -p handoff
-git diff --binary --cached > handoff/pd-review.patch
-git diff --binary >> handoff/pd-review.patch
+PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX.patch)
+git diff --binary --cached > "$PATCH_TMP"
+git diff --binary >> "$PATCH_TMP"
 while IFS= read -r -d '' path; do
   git diff --binary --no-index -- /dev/null "$path" || true
-done < <(git ls-files --others --exclude-standard -z) >> handoff/pd-review.patch
-PATCH_ID=$(shasum -a 256 handoff/pd-review.patch | cut -d ' ' -f 1)
+done < <(git ls-files --others --exclude-standard -z) >> "$PATCH_TMP"
+PATCH_ID=$(shasum -a 256 "$PATCH_TMP" | cut -d ' ' -f 1)
+PATCH_ARTIFACT="handoff/pd-review-${PATCH_ID}.patch"
+mv "$PATCH_TMP" "$PATCH_ARTIFACT"
 codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
   -o handoff/pd-review-${PATCH_ID}.md \
   --title "PD external review for <base-sha> + uncommitted patch ${PATCH_ID}" \
   > handoff/pd-review-${PATCH_ID}.jsonl
 ```
 
-Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts are durable release evidence, but they are not part of the reviewed source diff.
+Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts and the matching `${PATCH_ARTIFACT}` are durable release evidence, but they are not part of the reviewed source diff.
 
-If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and record the patch hash or patch artifact that covers staged, unstaged, and newly added files.
+If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and preserve the `${PATCH_ARTIFACT}` file that covers staged, unstaged, and newly added files.
 
 The receipt must include or preserve:
 
@@ -37,6 +40,7 @@ The receipt must include or preserve:
 - model name
 - base and head SHA or another immutable diff range
 - reviewed scope
+- preserved patch artifact path for pre-commit reviews
 - raw findings
 - explicit pass/fail or no-findings result
 - durable artifact path, PR comment, CI artifact, or hosted review URL
