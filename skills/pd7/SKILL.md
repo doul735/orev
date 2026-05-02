@@ -121,7 +121,7 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
 - Report reviewer identity, invocation evidence, reviewed artifacts, immutable diff scope, and Cancer/Polyp/Cigarette counts.
 - If the independent reviewer reports Cancer or Polyp findings, stop before commit or PR, fix the findings, rerun executable proof/build/architecture/orev checks as applicable, and rerun the independent reviewer gate against the updated final diff. PD 7 may proceed only when independent reviewer Cancer and Polyp counts are 0.
-- If the independent reviewer reports Cigarette-only findings, fix them in the current pass, rerun executable proof/build/architecture checks as applicable, and rerun this gate unless the finding required no tracked-file change.
+- If the independent reviewer reports Cigarette-only findings, fix them in the current pass, rerun executable proof/build/architecture/orev checks as applicable, and rerun this gate unless the finding required no tracked-file change. Any tracked-file Cigarette fix invalidates the prior deterministic `orev review` artifact and requires a fresh clean artifact before reviewer rerun.
 - Any tracked-file change after reviewer approval invalidates the receipt. Rerun this gate against the updated final diff before continuing.
 
 ### Step 8: Commit & PR
@@ -141,7 +141,7 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - [ ] orev 결정론적 gate 완료, clean artifact path 기록
 - [ ] independent reviewer gate가 최종 immutable diff 기준으로 통과, self-review가 approval로 계산되지 않았다는 증거
 - [ ] reviewer receipt에 base/head 또는 snapshot, changed-files basis, artifact path 기록
-- [ ] independent reviewer Cancer 0 / Polyp 0 확인, Cigarette-only tracked-file fixes는 재검증 완료
+- [ ] independent reviewer Cancer 0 / Polyp 0 확인, Cigarette-only tracked-file fixes는 executable proof/build/architecture/orev/reviewer 재검증 완료
 - [ ] reviewer approval 이후 tracked-file change 없음 또는 gate 재실행 완료
 - [ ] PR 생성됨
 - [ ] /commit skill 또는 command invocation 증거
