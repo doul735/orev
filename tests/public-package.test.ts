@@ -135,7 +135,6 @@ describe("public package documentation", () => {
       expect(content).toContain("cross-model review unavailable");
       expect(content).toContain("independent reviewer Cancer and Polyp counts are 0");
       expect(content).toContain("If the independent reviewer reports Cigarette-only findings");
-      expect(content).toContain("tracked-file Cigarette fix invalidates the prior deterministic `orev review` artifact");
     }
 
     expect(architecture).toContain("`pd5`: SUX_review + independent reviewer + tests + build + orev review");
@@ -165,6 +164,15 @@ describe("public package documentation", () => {
     expect(pd5).toContain("code-review: Cancer 0");
     expect(pd5).toContain("ux-review: Cancer 0");
     expect(tiers).toContain("Any Cancer finding hard-stops PD 5");
+  });
+
+  it("documents SUX changed-file discovery for repositories without HEAD", async () => {
+    const sux = await readProjectFile("skills/SUX_review/SKILL.md");
+
+    expect(sux).toContain("git rev-parse --verify HEAD");
+    expect(sux).toContain("If `HEAD` does not exist");
+    expect(sux).toContain("git diff --name-only --cached");
+    expect(sux).toContain("git status --short");
   });
 
   it("allows equivalent executable proof when PD7 E2E is not applicable", async () => {

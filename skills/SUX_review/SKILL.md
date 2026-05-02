@@ -12,7 +12,9 @@ Run `code-review` and `ux-review` through the runtime's official skill or comman
 ## Workflow
 
 1. Check whether there are changed files.
-   - Use `git diff --name-only HEAD`, `git diff --name-only --cached`, and `git status --short` as the changed-files basis.
+   - Use `git rev-parse --verify HEAD` to decide whether a base commit exists.
+   - If `HEAD` exists, use `git diff --name-only HEAD`, `git diff --name-only --cached`, and `git status --short` as the changed-files basis.
+   - If `HEAD` does not exist, use `git diff --name-only --cached`, `git diff --name-only --no-index -- /dev/null <path>` for untracked files as needed, and `git status --short` as the changed-files basis.
 2. Launch `code-review` and `ux-review` in parallel through the official skill or command mechanism.
 3. Combine summaries and findings.
 4. Ask the user which findings to fix immediately.
