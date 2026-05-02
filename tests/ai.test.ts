@@ -28,8 +28,9 @@ class FakeProvider implements AiProvider {
 
 function successResponse(): string {
   return JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     overallRisk: "low",
+    pathologyCounts: { Cancer: 0, Polyp: 1, Cigarette: 0 },
     summary: "The change is small and supported by the provided diff.",
     dimensions: [
       { dimension: "security", risk: "low", summary: "No supported security issue found." },
@@ -42,9 +43,13 @@ function successResponse(): string {
     findings: [{
       dimension: "correctness",
       severity: "info",
+      pathology: "Polyp",
       title: "Review completed",
       evidence: "app.ts changed one exported value.",
       recommendation: "Keep deterministic tests around the changed behavior.",
+      blastRadius: "Only the changed app.ts export is affected.",
+      infectionPath: "Future callers could rely on the changed exported value without coverage.",
+      containment: "Add deterministic tests around the exported behavior.",
       confidence: 0.8,
       file: "app.ts",
       line: 1
@@ -54,16 +59,21 @@ function successResponse(): string {
 
 function uxSuccessResponse(): string {
   return JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     target: "Changed onboarding flow",
+    pathologyCounts: { Cancer: 0, Polyp: 1, Cigarette: 2 },
     summary: "The flow is understandable, but feedback and empty states need clearer planning.",
     findings: [
       {
         lens: "feedbackInteraction",
         category: "quickWin",
+        pathology: "Cigarette",
         title: "Add save confirmation",
         current: "The changed flow does not show a visible success confirmation in the provided context.",
         suggestion: "Show a short confirmation after the user completes the action.",
+        blastRadius: "The affected save flow can feel ambiguous after completion.",
+        infectionPath: "Similar flows may omit feedback if this pattern remains normalized.",
+        containment: "Document and test the success confirmation expectation.",
         confidence: 0.82,
         file: "app.ts",
         line: 1
@@ -71,17 +81,25 @@ function uxSuccessResponse(): string {
       {
         lens: "stateHandling",
         category: "major",
+        pathology: "Polyp",
         title: "Plan empty state copy",
         current: "No empty state behavior is visible for first-time users.",
         suggestion: "Define empty state copy and next action before release.",
+        blastRadius: "First-time users can hit an unclear onboarding state.",
+        infectionPath: "Other onboarding states may ship without recovery copy.",
+        containment: "Add empty state acceptance criteria before release.",
         confidence: 0.74
       },
       {
         lens: "accessibility",
         category: "niceToHave",
+        pathology: "Cigarette",
         title: "Clarify keyboard focus path",
         current: "The context does not describe focus order for the new interaction.",
         suggestion: "Document the expected keyboard path for QA.",
+        blastRadius: "Keyboard users may have inconsistent navigation expectations.",
+        infectionPath: "Undocumented focus behavior can repeat in adjacent interactions.",
+        containment: "Include keyboard path notes in QA coverage.",
         confidence: 0.68
       }
     ]
@@ -134,7 +152,7 @@ describe("AI review orchestration", () => {
     expect(markdown).toContain("Review mode: deterministic MVP checks only; no semantic LLM code review was run.");
   });
 
-  it("renders six dimensions when a fake provider returns valid JSON", async () => {
+  it("renders pathology counts and six dimensions when a fake provider returns valid JSON", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 3;\n");
     const provider = new FakeProvider(successResponse());
@@ -162,13 +180,19 @@ describe("AI review orchestration", () => {
     expect(provider.calls).toBe(1);
     expect(result.ai?.status).toBe("success");
     expect(result.ai?.review?.mode).toBe("code");
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 1, Cigarette: 0 });
     expect(result.ai?.review?.mode === "code" ? result.ai.review.dimensions : []).toHaveLength(6);
     expect(markdown).toContain("## AI Verified Review");
+    expect(markdown).toContain("### Pathology Summary");
+    expect(markdown).toContain("- Cancer: 0");
+    expect(markdown).toContain("- Polyp: 1");
+    expect(markdown).toContain("### Polyp");
+    expect(markdown).toContain("Blast radius: Only the changed app.ts export is affected.");
     expect(markdown).toContain("**security** (low)");
     expect(markdown).toContain("**architecture** (low)");
   });
 
-  it("renders UX review headings and category counts from a fake provider", async () => {
+  it("renders UX review pathology headings from a fake provider", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 31;\n");
     const provider = new FakeProvider(uxSuccessResponse());
@@ -196,17 +220,19 @@ describe("AI review orchestration", () => {
     expect(provider.calls).toBe(1);
     expect(result.ai?.status).toBe("success");
     expect(result.ai?.review?.mode).toBe("ux");
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 1, Cigarette: 2 });
     expect(markdown).toContain("## 기획 리뷰: Changed onboarding flow");
     expect(markdown).toContain("### 요약");
-    expect(markdown).toContain("- Quick Win: 1");
-    expect(markdown).toContain("- Major: 1");
-    expect(markdown).toContain("- Nice-to-have: 1");
-    expect(markdown).toContain("### 🟢 Quick Win");
-    expect(markdown).toContain("### 🟡 Major");
-    expect(markdown).toContain("### 🔵 Nice-to-have");
+    expect(markdown).toContain("### Pathology Summary");
+    expect(markdown).toContain("- Polyp: 1");
+    expect(markdown).toContain("- Cigarette: 2");
+    expect(markdown).toContain("### Cigarette");
+    expect(markdown).toContain("### Polyp");
     expect(markdown).toContain("관점: feedbackInteraction");
+    expect(markdown).toContain("노력 메타데이터: quickWin");
     expect(markdown).toContain("현재: The changed flow does not show");
     expect(markdown).toContain("제안: Show a short confirmation");
+    expect(markdown).toContain("Containment: Document and test the success confirmation expectation.");
     expect(markdown).toContain("위치: `app.ts:1`");
   });
 
@@ -319,7 +345,7 @@ describe("AI review orchestration", () => {
   it("fails closed when provider JSON does not match the schema", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 5;\n");
-    const provider = new FakeProvider(JSON.stringify({ schemaVersion: 1, summary: "missing required fields" }));
+    const provider = new FakeProvider(JSON.stringify({ schemaVersion: 1, summary: "legacy schema missing required pathology fields" }));
 
     const { result, markdown } = await runReview({
       target: repo,
@@ -383,8 +409,9 @@ describe("AI review orchestration", () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 6;\n");
     const provider = new FakeProvider(JSON.stringify({
-      schemaVersion: 1,
+      schemaVersion: 2,
       overallRisk: "low",
+      pathologyCounts: { Cancer: 0, Polyp: 0, Cigarette: 0 },
       summary: `Leaked value ${secretSentinel}`,
       dimensions: [
         { dimension: "security", risk: "low", summary: "No supported security issue found." },

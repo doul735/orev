@@ -5,8 +5,9 @@ function buildCodeReviewPrompt(context: AiSafeContext): string {
 
 Schema:
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "overallRisk": "low" | "medium" | "high" | "critical",
+  "pathologyCounts": { "Cancer": number, "Polyp": number, "Cigarette": number },
   "summary": string,
   "dimensions": [
     { "dimension": "security", "risk": "low" | "medium" | "high" | "critical", "summary": string },
@@ -20,9 +21,13 @@ Schema:
     {
       "dimension": "security" | "correctness" | "crossFileConsistency" | "convention" | "performance" | "architecture",
       "severity": "info" | "warning" | "error" | "critical",
+      "pathology": "Cancer" | "Polyp" | "Cigarette",
       "title": string,
       "evidence": string,
       "recommendation": string,
+      "blastRadius": string,
+      "infectionPath": string,
+      "containment": string,
       "confidence": number,
       "file": string optional,
       "line": number optional
@@ -34,6 +39,9 @@ Rules:
 - Do not invent files, lines, or behavior not supported by the provided context.
 - Keep evidence specific and quote only small snippets.
 - Use an empty findings array when no supported finding exists.
+- Cancer/Polyp/Cigarette are the primary release taxonomy. severity and risk are secondary metadata only.
+- pathologyCounts must exactly match the findings array.
+- For each finding, explain blastRadius, infectionPath, and containment concretely.
 - Include exactly the six dimensions listed above.
 
 Safe context metadata: ${context.byteCount} bytes, truncated=${context.truncated ? "true" : "false"}.
@@ -46,16 +54,21 @@ function buildUxReviewPrompt(context: AiSafeContext): string {
 
 Schema:
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "target": string,
+  "pathologyCounts": { "Cancer": number, "Polyp": number, "Cigarette": number },
   "summary": string,
   "findings": [
     {
       "lens": "userScenario" | "stateHandling" | "mobileResponsive" | "accessibility" | "edgeCases" | "featureIntegration" | "feedbackInteraction",
       "category": "quickWin" | "major" | "niceToHave",
+      "pathology": "Cancer" | "Polyp" | "Cigarette",
       "title": string,
       "current": string,
       "suggestion": string,
+      "blastRadius": string,
+      "infectionPath": string,
+      "containment": string,
       "confidence": number,
       "file": string optional,
       "line": number optional
@@ -81,7 +94,9 @@ Rules:
 - Focus on planning and UX gaps only; do not perform security, code quality, architecture, or style review.
 - Do not invent files, lines, screens, or behavior not supported by the provided context.
 - Use an empty findings array when no supported UX finding exists.
-- Every finding must include one of the seven lenses and one of the three categories.
+- Cancer/Polyp/Cigarette are the primary release taxonomy. quickWin/major/niceToHave are effort metadata only.
+- pathologyCounts must exactly match the findings array.
+- Every finding must include one of the seven lenses, one of the three categories, and concrete blastRadius/infectionPath/containment fields.
 - Keep current and suggestion concrete enough to paste into a UX review report.
 
 Safe context metadata: ${context.byteCount} bytes, truncated=${context.truncated ? "true" : "false"}.

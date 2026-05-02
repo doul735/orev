@@ -16,6 +16,14 @@ export type UxReviewLens = "userScenario" | "stateHandling" | "mobileResponsive"
 
 export type UxFindingCategory = "quickWin" | "major" | "niceToHave";
 
+export type PathologyClass = "Cancer" | "Polyp" | "Cigarette";
+
+export interface PathologyCounts {
+  Cancer: number;
+  Polyp: number;
+  Cigarette: number;
+}
+
 export interface AiProvider {
   readonly name: string;
   generateJson(request: AiProviderRequest): Promise<string>;
@@ -69,9 +77,13 @@ export interface AiDimensionSummary {
 export interface AiFinding {
   dimension: AiReviewDimension;
   severity: AiReviewSeverity;
+  pathology: PathologyClass;
   title: string;
   evidence: string;
   recommendation: string;
+  blastRadius: string;
+  infectionPath: string;
+  containment: string;
   confidence: number;
   file?: string;
   line?: number;
@@ -79,8 +91,9 @@ export interface AiFinding {
 
 export interface AiReviewSuccess {
   mode: "code";
-  schemaVersion: 1;
+  schemaVersion: 2;
   overallRisk: AiReviewRisk;
+  pathologyCounts: PathologyCounts;
   summary: string;
   dimensions: AiDimensionSummary[];
   findings: AiFinding[];
@@ -89,9 +102,13 @@ export interface AiReviewSuccess {
 export interface UxFinding {
   lens: UxReviewLens;
   category: UxFindingCategory;
+  pathology: PathologyClass;
   title: string;
   current: string;
   suggestion: string;
+  blastRadius: string;
+  infectionPath: string;
+  containment: string;
   confidence: number;
   file?: string;
   line?: number;
@@ -99,8 +116,9 @@ export interface UxFinding {
 
 export interface UxReviewSuccess {
   mode: "ux";
-  schemaVersion: 1;
+  schemaVersion: 2;
   target: string;
+  pathologyCounts: PathologyCounts;
   summary: string;
   findings: UxFinding[];
 }
