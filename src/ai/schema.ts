@@ -62,6 +62,20 @@ function isPathology(value: unknown): value is PathologyClass {
   return typeof value === "string" && pathologies.includes(value as PathologyClass);
 }
 
+function pathologyFromSeverity(severity: AiReviewSeverity): PathologyClass {
+  if (severity === "critical") {
+    return "Cancer";
+  }
+  if (severity === "error" || severity === "warning") {
+    return "Polyp";
+  }
+  return "Cigarette";
+}
+
+function pathologyFromUxCategory(category: UxFindingCategory): PathologyClass {
+  return category === "major" ? "Polyp" : "Cigarette";
+}
+
 function countsForFindings(findings: Array<{ pathology: PathologyClass }>): PathologyCounts {
   return findings.reduce<PathologyCounts>((counts, finding) => {
     counts[finding.pathology] += 1;
@@ -92,13 +106,9 @@ function parseFinding(value: unknown): AiFinding | undefined {
   if (!isRecord(value)
     || !isDimension(value.dimension)
     || !isSeverity(value.severity)
-    || !isPathology(value.pathology)
     || !isString(value.title)
     || !isString(value.evidence)
     || !isString(value.recommendation)
-    || !isString(value.blastRadius)
-    || !isString(value.infectionPath)
-    || !isString(value.containment)
     || typeof value.confidence !== "number"
     || !Number.isFinite(value.confidence)
     || value.confidence < 0
@@ -114,13 +124,13 @@ function parseFinding(value: unknown): AiFinding | undefined {
   const finding: AiFinding = {
     dimension: value.dimension,
     severity: value.severity,
-    pathology: value.pathology,
+    pathology: isPathology(value.pathology) ? value.pathology : pathologyFromSeverity(value.severity),
     title: value.title,
     evidence: value.evidence,
     recommendation: value.recommendation,
-    blastRadius: value.blastRadius,
-    infectionPath: value.infectionPath,
-    containment: value.containment,
+    blastRadius: isString(value.blastRadius) ? value.blastRadius : "Derived from legacy schema v1 severity metadata.",
+    infectionPath: isString(value.infectionPath) ? value.infectionPath : "Legacy schema v1 did not provide infection path details.",
+    containment: isString(value.containment) ? value.containment : value.recommendation,
     confidence: value.confidence
   };
   if (typeof value.file === "string") {
@@ -133,7 +143,7 @@ function parseFinding(value: unknown): AiFinding | undefined {
 }
 
 function parseCodeReview(parsed: unknown): AiReviewSuccess {
-  if (!isRecord(parsed) || parsed.schemaVersion !== 2 || !isRisk(parsed.overallRisk) || !isString(parsed.summary)) {
+  if (!isRecord(parsed) || (parsed.schemaVersion !== 2 && parsed.schemaVersion !== 1) || !isRisk(parsed.overallRisk) || !isString(parsed.summary)) {
     throw new Error("AI response schema mismatch");
   }
   if (!Array.isArray(parsed.dimensions) || parsed.dimensions.length !== aiDimensions.length) {
@@ -173,13 +183,9 @@ function parseUxFinding(value: unknown): UxFinding | undefined {
   if (!isRecord(value)
     || !isUxLens(value.lens)
     || !isUxCategory(value.category)
-    || !isPathology(value.pathology)
     || !isString(value.title)
     || !isString(value.current)
     || !isString(value.suggestion)
-    || !isString(value.blastRadius)
-    || !isString(value.infectionPath)
-    || !isString(value.containment)
     || typeof value.confidence !== "number"
     || !Number.isFinite(value.confidence)
     || value.confidence < 0
@@ -195,13 +201,13 @@ function parseUxFinding(value: unknown): UxFinding | undefined {
   const finding: UxFinding = {
     lens: value.lens,
     category: value.category,
-    pathology: value.pathology,
+    pathology: isPathology(value.pathology) ? value.pathology : pathologyFromUxCategory(value.category),
     title: value.title,
     current: value.current,
     suggestion: value.suggestion,
-    blastRadius: value.blastRadius,
-    infectionPath: value.infectionPath,
-    containment: value.containment,
+    blastRadius: isString(value.blastRadius) ? value.blastRadius : "Derived from legacy schema v1 UX category metadata.",
+    infectionPath: isString(value.infectionPath) ? value.infectionPath : "Legacy schema v1 did not provide infection path details.",
+    containment: isString(value.containment) ? value.containment : value.suggestion,
     confidence: value.confidence
   };
   if (typeof value.file === "string") {
@@ -214,7 +220,7 @@ function parseUxFinding(value: unknown): UxFinding | undefined {
 }
 
 function parseUxReview(parsed: unknown): UxReviewSuccess {
-  if (!isRecord(parsed) || parsed.schemaVersion !== 2 || !isString(parsed.target) || !isString(parsed.summary)) {
+  if (!isRecord(parsed) || (parsed.schemaVersion !== 2 && parsed.schemaVersion !== 1) || !isString(parsed.target) || !isString(parsed.summary)) {
     throw new Error("AI UX response schema mismatch");
   }
   if ("dimensions" in parsed || "overallRisk" in parsed) {

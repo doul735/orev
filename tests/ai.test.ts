@@ -106,6 +106,34 @@ function uxSuccessResponse(): string {
   });
 }
 
+function legacyCodeSuccessResponse(): string {
+  const parsed = JSON.parse(successResponse()) as Record<string, unknown>;
+  parsed.schemaVersion = 1;
+  delete parsed.pathologyCounts;
+  const findings = parsed.findings as Array<Record<string, unknown>>;
+  for (const finding of findings) {
+    delete finding.pathology;
+    delete finding.blastRadius;
+    delete finding.infectionPath;
+    delete finding.containment;
+  }
+  return JSON.stringify(parsed);
+}
+
+function legacyUxSuccessResponse(): string {
+  const parsed = JSON.parse(uxSuccessResponse()) as Record<string, unknown>;
+  parsed.schemaVersion = 1;
+  delete parsed.pathologyCounts;
+  const findings = parsed.findings as Array<Record<string, unknown>>;
+  for (const finding of findings) {
+    delete finding.pathology;
+    delete finding.blastRadius;
+    delete finding.infectionPath;
+    delete finding.containment;
+  }
+  return JSON.stringify(parsed);
+}
+
 async function git(args: string[], cwd: string): Promise<void> {
   await execFileAsync("git", args, { cwd });
 }
@@ -403,6 +431,68 @@ describe("AI review orchestration", () => {
     expect(result.ai?.status).toBe("success");
     expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 1, Cigarette: 0 });
     expect(markdown).toContain("- Polyp: 1");
+  });
+
+  it("accepts legacy schema v1 code provider responses and derives pathology fields", async () => {
+    const repo = await createGitFixture();
+    await writeFile(path.join(repo, "app.ts"), "export const value = 53;\n");
+    const provider = new FakeProvider(legacyCodeSuccessResponse());
+
+    const { result, markdown } = await runReview({
+      target: repo,
+      out: path.join(tempRoot, "legacy-code.md"),
+      format: "markdown",
+      maxFiles: 10,
+      maxBytes: 10000,
+      includeTests: false,
+      failOnSecrets: true,
+      verbose: false,
+      ai: {
+        enabled: true,
+        mode: "code",
+        model: "claude",
+        maxAiContextBytes: 120000,
+        maxAiOutputTokens: 3000,
+        aiTimeoutMs: 60000,
+        provider
+      }
+    });
+
+    expect(result.ai?.status).toBe("success");
+    expect(result.ai?.review?.schemaVersion).toBe(2);
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 0, Cigarette: 1 });
+    expect(markdown).toContain("Derived from legacy schema v1 severity metadata.");
+  });
+
+  it("accepts legacy schema v1 UX provider responses and derives pathology fields", async () => {
+    const repo = await createGitFixture();
+    await writeFile(path.join(repo, "app.ts"), "export const value = 54;\n");
+    const provider = new FakeProvider(legacyUxSuccessResponse());
+
+    const { result, markdown } = await runReview({
+      target: repo,
+      out: path.join(tempRoot, "legacy-ux.md"),
+      format: "markdown",
+      maxFiles: 10,
+      maxBytes: 10000,
+      includeTests: false,
+      failOnSecrets: true,
+      verbose: false,
+      ai: {
+        enabled: true,
+        mode: "ux",
+        model: "claude",
+        maxAiContextBytes: 120000,
+        maxAiOutputTokens: 3000,
+        aiTimeoutMs: 60000,
+        provider
+      }
+    });
+
+    expect(result.ai?.status).toBe("success");
+    expect(result.ai?.review?.schemaVersion).toBe(2);
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 1, Cigarette: 2 });
+    expect(markdown).toContain("Derived from legacy schema v1 UX category metadata.");
   });
 
   it("fails closed when UX mode receives the code review schema", async () => {
