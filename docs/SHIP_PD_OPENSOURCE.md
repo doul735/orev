@@ -10,7 +10,7 @@ PD tiers are workflow skills with escalating verification depth:
 |---|---|
 | `/pd1` | Hygiene pass for docs, config, one-liner changes |
 | `/pd3` | Standard review for normal feature/bug fix work |
-| `/pd5` | Medium scope — SUX_review + independent reviewer + tests + build |
+| `/pd5` | Medium scope — SUX_review + tests + build + post-PR GitHub Codex gate |
 | `/pd7` | Highest default verification — auth/payment/security/data, Cancer-zero, applicable E2E/equivalent proof, architecture |
 | `/pd9` | Reserved custom variant slot |
 
@@ -45,7 +45,7 @@ Publish these components together:
 - block secrets before AI review
 - keep code review and UX review separate
 - run tests/builds before merge
-- require independent adversarial review for PD 5 and PD 7
+- require post-PR GitHub Codex review for PD 5 and PD 7
 - keep direct provider/API review experimental and self-hosted
 
 ## Repository Shape
