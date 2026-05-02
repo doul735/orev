@@ -16,7 +16,7 @@ Run the review against the same final diff used for the PR. Resolve and record t
 ```bash
 mkdir -p handoff
 PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX)
-git diff --binary HEAD > "$PATCH_TMP"
+git diff --binary <base-sha> > "$PATCH_TMP"
 while IFS= read -r -d '' path; do
   git diff --binary --no-index -- /dev/null "$path" || true
 done < <(git ls-files --others --exclude-standard -z) >> "$PATCH_TMP"
@@ -30,7 +30,7 @@ codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
   > handoff/pd-review-${PATCH_ID}.jsonl
 ```
 
-Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts and the matching `${PATCH_ARTIFACT}` are durable release evidence, but they are not part of the reviewed source diff. The patch artifact must represent the final worktree snapshot against `HEAD`; do not concatenate cached and unstaged patches for the same path, because that can diverge from the diff reviewed by `--uncommitted` when files are partially staged.
+Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts and the matching `${PATCH_ARTIFACT}` are durable release evidence, but they are not part of the reviewed source diff. The patch artifact must represent the final worktree snapshot against `<base-sha>`, matching the full diff reviewed by `--base <base-sha> --uncommitted`; do not concatenate cached and unstaged patches for the same path, because that can diverge from the diff reviewed by `--uncommitted` when files are partially staged.
 
 If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted`, preserve the `${PATCH_ARTIFACT}` file that covers staged, unstaged, and newly added files, and do not edit files between generating `${PATCH_ARTIFACT}` and running Codex. If any tracked or untracked source file changes after `${PATCH_ARTIFACT}` is generated, discard the receipt and regenerate the patch artifact before rerunning the reviewer.
 
