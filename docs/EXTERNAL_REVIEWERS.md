@@ -15,7 +15,7 @@ Run the review against the same final diff used for the PR. Resolve and record t
 
 ```bash
 mkdir -p handoff
-PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX.patch)
+PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX)
 git diff --binary --cached > "$PATCH_TMP"
 git diff --binary >> "$PATCH_TMP"
 while IFS= read -r -d '' path; do

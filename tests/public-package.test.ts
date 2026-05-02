@@ -91,7 +91,7 @@ describe("public package documentation", () => {
 
     expect(externalReviewers).toContain("OpenAI Codex CLI");
     expect(externalReviewers).toContain("record the base SHA");
-    expect(externalReviewers).toContain("PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX.patch)");
+    expect(externalReviewers).toContain("PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX)");
     expect(externalReviewers).toContain("PATCH_ARTIFACT=\"handoff/pd-review-${PATCH_ID}.patch\"");
     expect(externalReviewers).toContain("codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json");
     expect(externalReviewers).toContain("durable artifact path");
