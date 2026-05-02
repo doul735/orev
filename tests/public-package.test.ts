@@ -135,6 +135,8 @@ describe("public package documentation", () => {
       expect(content).toContain("cross-model review unavailable");
       expect(content).toContain("independent reviewer Cancer and Polyp counts are 0");
       expect(content).toContain("If the independent reviewer reports Cigarette-only findings");
+      expect(content).toContain("tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact");
+      expect(content).toContain("reviewer-driven tracked-file fixes는 SUX_review");
     }
 
     expect(architecture).toContain("`pd5`: SUX_review + independent reviewer + tests + build + orev review");

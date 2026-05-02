@@ -82,8 +82,8 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
 - Report reviewer identity, invocation evidence, reviewed artifacts, immutable diff scope, and Cancer/Polyp/Cigarette counts.
 - If the independent reviewer reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7. Do not continue under PD 5 after fixing a Cancer-class issue.
-- If the independent reviewer reports Polyp findings, stop before commit or PR, fix the findings, rerun tests/build/orev as applicable, and rerun the independent reviewer gate against the updated final diff. PD 5 may proceed only when independent reviewer Cancer and Polyp counts are 0.
-- If the independent reviewer reports Cigarette-only findings, fix them in the current pass, rerun tests/build/orev as applicable, and rerun this gate unless the finding required no tracked-file change. Any tracked-file Cigarette fix invalidates the prior deterministic `orev review` artifact and requires a fresh clean artifact before reviewer rerun.
+- If the independent reviewer reports Polyp findings, stop before commit or PR, fix the findings, rerun SUX_review, tests/build/orev as applicable, and rerun the independent reviewer gate against the updated final diff. PD 5 may proceed only when independent reviewer Cancer and Polyp counts are 0.
+- If the independent reviewer reports Cigarette-only findings, fix them in the current pass, rerun tests/build/orev as applicable, and rerun this gate unless the finding required no tracked-file change. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before reviewer rerun.
 - Any tracked-file change after reviewer approval invalidates the receipt. Rerun this gate against the updated final diff before continuing.
 
 ### Step 7: Commit & PR
@@ -104,7 +104,7 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - [ ] orev 결정론적 gate 완료, clean artifact path 기록
 - [ ] independent reviewer gate가 최종 immutable diff 기준으로 통과, self-review가 approval로 계산되지 않았다는 증거
 - [ ] reviewer receipt에 base/head 또는 snapshot, changed-files basis, artifact path 기록
-- [ ] independent reviewer Cancer 0 / Polyp 0 확인, Cigarette-only tracked-file fixes는 tests/build/orev/reviewer 재검증 완료
+- [ ] independent reviewer Cancer 0 / Polyp 0 확인, reviewer-driven tracked-file fixes는 SUX_review/tests/build/orev/reviewer 재검증 완료
 - [ ] reviewer approval 이후 tracked-file change 없음 또는 gate 재실행 완료
 - [ ] /commit skill 또는 command invocation 증거
 - [ ] PR 생성됨
