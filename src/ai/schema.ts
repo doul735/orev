@@ -194,10 +194,13 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
   const typedFindings = findings.filter((finding): finding is AiFinding => finding !== undefined);
   const derivedCounts = countsForFindings(typedFindings);
   const suppliedCounts = parsePathologyCounts(parsed.pathologyCounts);
-  if (parsed.schemaVersion === 2 && (suppliedCounts === undefined || !countsMatch(suppliedCounts, derivedCounts))) {
-    throw new Error("AI response pathology counts do not match findings");
+  let pathologyCounts = derivedCounts;
+  if (parsed.schemaVersion === 2) {
+    if (suppliedCounts === undefined || !countsMatch(suppliedCounts, derivedCounts)) {
+      throw new Error("AI response pathology counts do not match findings");
+    }
+    pathologyCounts = suppliedCounts;
   }
-  const pathologyCounts = suppliedCounts ?? derivedCounts;
 
   return {
     mode: "code",

@@ -529,6 +529,38 @@ describe("AI review orchestration", () => {
     expect(markdown).toContain("Derived from legacy schema v1 severity metadata.");
   });
 
+  it("ignores raw pathology counts on legacy schema v1 code provider responses", async () => {
+    const repo = await createGitFixture();
+    await writeFile(path.join(repo, "app.ts"), "export const value = 57;\n");
+    const parsed = JSON.parse(legacyCodeSuccessResponse()) as Record<string, unknown>;
+    parsed.pathologyCounts = { Cancer: 1, Polyp: 0, Cigarette: 0 };
+    const provider = new FakeProvider(JSON.stringify(parsed));
+
+    const { result, markdown } = await runReview({
+      target: repo,
+      out: path.join(tempRoot, "legacy-code-counts.md"),
+      format: "markdown",
+      maxFiles: 10,
+      maxBytes: 10000,
+      includeTests: false,
+      failOnSecrets: true,
+      verbose: false,
+      ai: {
+        enabled: true,
+        mode: "code",
+        model: "claude",
+        maxAiContextBytes: 120000,
+        maxAiOutputTokens: 3000,
+        aiTimeoutMs: 60000,
+        provider
+      }
+    });
+
+    expect(result.ai?.status).toBe("success");
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 0, Cigarette: 1 });
+    expect(markdown).toContain("- Cigarette: 1");
+  });
+
   it("fails closed for legacy schema v1 UX provider responses", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 54;\n");
