@@ -64,7 +64,7 @@ The tiers are simple:
 
 - PD 1: docs, config, one-liners
 - PD 3: normal feature or bug fix
-- PD 5: medium feature work with independent reviewer approval, tests, and build
+- PD 5: medium feature work with post-PR GitHub Codex approval, tests, and build
 - PD 7: release proof for large, auth, payment, data, security, and Cancer-zero changes
 - PD 9: reserved custom variant slot
 

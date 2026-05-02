@@ -26,5 +26,5 @@ The following are original to this project:
 - **Code Pathology Taxonomy**: Cigarette / Polyp / Cancer classification with blast radius, infection path, and containment
 - **PD Tier System**: PD 1 / 3 / 5 / 7 workflow depth tiers with pathology-based escalation, plus reserved custom variant slots such as PD 9
 - **Privacy Gate**: ALLOW / REDACT / SUMMARIZE / BLOCK four-level decision system
-- **Independent review integration**: mandatory adversarial review for PD 5 and PD 7 using external review runtimes or independent reviewer models
+- **GitHub Codex gate integration**: mandatory post-PR Codex review for PD 5 and PD 7, with self-review kept as supporting evidence only
 - **SUX_review**: parallel code + UX review orchestration
