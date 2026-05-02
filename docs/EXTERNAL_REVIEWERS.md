@@ -1,8 +1,38 @@
 # External Reviewer Setup
 
-PD 5 and PD 7 require an independent semantic reviewer. The deterministic `orev review` report is supporting evidence only; it does not approve a release.
+PD 5 and PD 7 require an official post-PR GitHub Codex reviewer/plugin merge gate. The deterministic `orev review` report, SUX_review, local self-review, and Codex CLI preflight receipts are supporting evidence only; they do not approve a PD 5 or PD 7 merge.
 
-## Default Supported Path: OpenAI Codex CLI
+PD 3 does not require Codex by default. If a PD 3 PR explicitly requests Codex review, or if Codex already commented, those comments must still be classified and resolved before merge.
+
+## Required Path: GitHub Codex Post-PR Gate
+
+After PR creation and before merge, trigger or wait for the official GitHub Codex reviewer/plugin. Then inspect both the review summary and inline review comments:
+
+```bash
+gh pr view <PR> --comments --reviews
+gh api repos/<owner>/<repo>/pulls/<PR>/comments
+```
+
+Required evidence:
+
+- PR URL and latest PR head SHA
+- Codex-reviewed commit SHA
+- every Codex inline comment with path, severity, and URL
+- pathology classification for each comment: Cancer, Polyp, or Cigarette
+- found/fixed/open counts
+- fixing commit SHA for every fixed Polyp or Cancer
+
+Rules:
+
+- Codex P2 or higher is at least Polyp.
+- Open Polyp or Cancer blocks merge.
+- If the PR head changed after Codex review, rerun or retrigger Codex before merge.
+- If GitHub Codex is unavailable, not installed, or cannot be inspected, PD 5 and PD 7 stop with `[blocked] post-PR Codex review unavailable`.
+- Do not downgrade to Claude Code self-review, local direct analysis, deterministic `orev review`, or Codex CLI preflight.
+
+## Supporting Path: OpenAI Codex CLI Preflight
+
+Codex CLI can be useful before PR creation, but it is not the mandatory PD 5/7 post-PR merge gate unless your organization explicitly maps it to the official GitHub Codex reviewer/plugin evidence path.
 
 Install and authenticate the official Codex CLI outside the implementing agent runtime:
 
@@ -11,7 +41,7 @@ npm install -g @openai/codex
 codex login
 ```
 
-Run the review against the same final diff used for the PR. Resolve and record the base SHA first; do not rely on a moving branch ref for release evidence. For the normal PD 5/7 pre-commit gate, include staged, unstaged, and newly added files in the reviewed scope. If the repository has no `HEAD` yet, record `no-head` as the immutable snapshot label and use the no-HEAD fallback below.
+Run the preflight review against the same final diff intended for the PR. Resolve and record the base SHA first; do not rely on a moving branch ref for release evidence. Include staged, unstaged, and newly added files in the reviewed scope. If the repository has no `HEAD` yet, record `no-head` as the immutable snapshot label and use the no-HEAD fallback below.
 
 ```bash
 mkdir -p handoff
@@ -53,7 +83,7 @@ If the final diff is already committed, use the immutable head SHA in the title 
 
 The receipt must include or preserve:
 
-- reviewer runtime: OpenAI Codex CLI or another hosted reviewer runtime
+- reviewer runtime: OpenAI Codex CLI or another supporting hosted reviewer runtime
 - model name
 - base and head SHA or another immutable diff range
 - reviewed scope
@@ -62,8 +92,8 @@ The receipt must include or preserve:
 - explicit pass/fail or no-findings result
 - durable artifact path, PR comment, CI artifact, or hosted review URL
 
-If Codex or another external runtime is unavailable, PD 5 and PD 7 stop with `[blocked] cross-model review unavailable`. Do not downgrade to self-review.
+If the preflight reviewer is unavailable, do not use it as release approval. The mandatory PD 5/7 merge decision still depends on the post-PR GitHub Codex gate above.
 
 ## Other Runtimes
 
-Organizations may replace Codex with another hosted reviewer. It must run outside the implementing agent's self-review loop and leave the same receipt evidence.
+Organizations may add another hosted reviewer, but the default orev contract still requires the official post-PR GitHub Codex reviewer/plugin for PD 5 and PD 7 unless the organization explicitly forks this policy.
