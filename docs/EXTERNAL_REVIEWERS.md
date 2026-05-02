@@ -21,6 +21,8 @@ codex exec review --base <base-sha> --model gpt-5.4 --json \
   > handoff/pd-review-<head-sha>.jsonl
 ```
 
+Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts are durable release evidence, but they are not part of the reviewed source diff.
+
 The receipt must include or preserve:
 
 - reviewer runtime: OpenAI Codex CLI or another hosted reviewer runtime

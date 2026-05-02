@@ -128,10 +128,6 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 
 - `/commit` 스킬을 runtime의 공식 skill/command invocation mechanism으로 실행한다.
 
-### Step 9: Save Context (최종)
-
-- `/save-context`를 runtime의 공식 skill/command invocation mechanism으로 최종 상태 저장한다.
-
 ### Verification
 
 - [ ] save-context 완료 (시작)
@@ -149,13 +145,12 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - [ ] reviewer approval 이후 tracked-file change 없음 또는 gate 재실행 완료
 - [ ] PR 생성됨
 - [ ] /commit skill 또는 command invocation 증거
-- [ ] 최종 save-context 완료
 
 ## 보고서
 
 ```
 PD 7 완료!
-1. 맥락 저장: MEMORY.md 업데이트 (시작+종료)
+1. 맥락 저장: MEMORY.md 업데이트 (시작)
 2. Privacy Gate: ALLOW
 3. SUX Review:
    - code-review: Cancer 0, Polyp N, Cigarette N → 현재 패스 수정
