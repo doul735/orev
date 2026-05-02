@@ -11,11 +11,16 @@ npm install -g @openai/codex
 codex login
 ```
 
-Run the review against the same final diff used for the PR. Resolve and record the base SHA first; do not rely on a moving branch ref for release evidence. For the normal PD 5/7 pre-commit gate, include uncommitted tracked changes in the reviewed scope.
+Run the review against the same final diff used for the PR. Resolve and record the base SHA first; do not rely on a moving branch ref for release evidence. For the normal PD 5/7 pre-commit gate, include staged, unstaged, and newly added files in the reviewed scope.
 
 ```bash
 mkdir -p handoff
-PATCH_ID=$(git diff --binary | shasum -a 256 | cut -d ' ' -f 1)
+git diff --binary --cached > handoff/pd-review.patch
+git diff --binary >> handoff/pd-review.patch
+while IFS= read -r -d '' path; do
+  git diff --binary --no-index -- /dev/null "$path" || true
+done < <(git ls-files --others --exclude-standard -z) >> handoff/pd-review.patch
+PATCH_ID=$(shasum -a 256 handoff/pd-review.patch | cut -d ' ' -f 1)
 codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
   -o handoff/pd-review-${PATCH_ID}.md \
   --title "PD external review for <base-sha> + uncommitted patch ${PATCH_ID}" \
@@ -24,7 +29,7 @@ codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
 
 Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts are durable release evidence, but they are not part of the reviewed source diff.
 
-If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and record the patch hash or patch artifact that was reviewed.
+If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and record the patch hash or patch artifact that covers staged, unstaged, and newly added files.
 
 The receipt must include or preserve:
 
