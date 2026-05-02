@@ -152,6 +152,7 @@ describe("public package documentation", () => {
     expect(pd3).toContain("Code Review: Cancer 0건");
     expect(pd3).toContain("Polyp 발견 → 현재 패스에서 수정");
     expect(pd3).toContain("Polyp 0건이 될 때까지 타입 체크/orev/커밋/PR 단계로 진행하지 않는다");
+    expect(pd3).toContain("tracked-file change가 발생하면 `/code-review`를 다시 실행해 새 Cancer/Polyp 0건을 증명한다");
     expect(pd5).toContain("Cancer 발견 → 즉시 중단");
     expect(pd5).toContain("mandatory escalation");
     expect(pd5).toContain("PD 5 테스트/빌드/커밋/PR 단계로 진행하지 않는다");
