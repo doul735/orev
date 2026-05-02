@@ -34,15 +34,19 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
    - performance
    - architecture
 
-5. If a hosted review runtime is available, run adversarial review from the artifacts and source context. Otherwise, perform direct local agent analysis and mark the report as fallback.
+5. If a hosted review runtime is available, run adversarial review from the artifacts and source context. Otherwise, perform direct local agent analysis and mark the report as fallback. Fallback self-review does not count as PD 5 or PD 7 release approval.
 
-6. Verify each finding against the actual code before reporting it.
+6. When you invoke nested workflows such as code-review, ux-review, SUX_review, save-context, or commit from a PD tier, use the runtime's official skill or command invocation mechanism so the nested instructions are loaded.
 
-7. Assign a pathology class to each finding:
+7. Verify each finding against the actual code before reporting it.
 
-   - Cigarette: low blast-radius habit or repeated small debt
-   - Polyp: localized actionable issue that can spread if ignored
+8. Assign a pathology class to each finding:
+
    - Cancer: systemic, security-sensitive, data-loss, or release-blocking issue
+   - Polyp: localized actionable issue that can spread if ignored
+   - Cigarette: low blast-radius habit or repeated small debt
+
+   Keep legacy labels only as secondary metadata, for example `legacy: MUST-FIX`, `legacy: SHOULD-FIX`, or `legacy: NIT`.
 
 ## Report Format
 
@@ -52,16 +56,45 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
 ### Summary
 - Changed files: N
 - Hosted review: success|fallback
-- Results: MUST-FIX X, SHOULD-FIX Y, NIT Z
-- Pathology: Cigarette X, Polyp Y, Cancer Z
+- Results: Cancer X, Polyp Y, Cigarette Z
+- Pathology: Cancer X, Polyp Y, Cigarette Z
 
-### MUST-FIX
+### Cigarette Stop Evidence
+- Iteration / workflow: [run name]
+- Counts this cycle: Cancer X, Polyp Y, Cigarette Z
+- Cigarette fixed now: [list]
+- Remaining Cigarette items: [list or none]
+- Cleanup attempted: [what was tried]
+- Zero Cancer / Polyp confirmation: [yes/no]
+- Stop streak status: [counts toward streak / resets streak / wait for more evidence]
+
+### Cancer
+1. **Title** `file:line`
+    - Problem: ...
+    - Evidence: ...
+    - Pathology: Cancer, blast radius / infection path / containment
+    - Source: hosted review | local verification | static analysis
+    - Recommendation: ...
+
+### Polyp
 1. **Title** `file:line`
    - Problem: ...
    - Evidence: ...
-   - Pathology: Cancer — blast radius / infection path / containment
+   - Pathology: Polyp, blast radius / infection path / containment
    - Source: hosted review | local verification | static analysis
    - Recommendation: ...
+
+### Cigarette
+1. **Title** `file:line`
+    - Problem: ...
+    - Evidence: ...
+    - Fix this pass: yes
+    - Remaining Cigarette items: ...
+    - Cleanup attempt: ...
+    - Zero Cancer / Polyp confirmation: yes
+    - Pathology: Cigarette, blast radius / infection path / containment
+    - Source: hosted review | local verification | static analysis
+    - Recommendation: ...
 ```
 
 ## Rules
@@ -71,3 +104,4 @@ Review changed code with project context, deterministic `orev` artifacts, and ve
 - Do not call direct provider APIs by default.
 - Use `orev review --ai` only as an experimental/self-hosted path.
 - Escalate Cancer findings to PD 7.
+- Cigarette findings are fixed in the current pass when a fix workflow is used, and the report must document cycle evidence, counts, cleanup attempt, remaining items, and zero Cancer / Polyp confirmation before counting the streak.

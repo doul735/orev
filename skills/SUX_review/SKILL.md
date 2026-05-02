@@ -6,12 +6,16 @@ argument-hint: "[--fix] [focus: security|performance|correctness|architecture|al
 
 # SUX Review
 
-Run `code-review` and `ux-review` independently, then merge the results.
+Run `code-review` and `ux-review` through the runtime's official skill or command invocation, not ad hoc agent calls, so their nested instructions are loaded. Keep them independent, then merge the results.
+`orev review` without `--ai` is a deterministic artifact gate only, not semantic review.
 
 ## Workflow
 
 1. Check whether there are changed files.
-2. Launch `code-review` and `ux-review` in parallel.
+   - Use `git rev-parse --verify HEAD` to decide whether a base commit exists.
+   - If `HEAD` exists, use `git diff --name-only HEAD`, `git diff --name-only --cached`, and `git status --short` as the changed-files basis.
+   - If `HEAD` does not exist, use `git diff --name-only --cached`, `git diff --name-only --no-index -- /dev/null <path>` for untracked files as needed, and `git status --short` as the changed-files basis.
+2. Launch `code-review` and `ux-review` in parallel through the official skill or command mechanism.
 3. Combine summaries and findings.
 4. Ask the user which findings to fix immediately.
 
@@ -20,12 +24,27 @@ Run `code-review` and `ux-review` independently, then merge the results.
 ```markdown
 # SUX Review Results
 
+## Evidence
+- Invocation: [official skill or command used]
+- Changed files basis: [git diff / cached diff / fallback range]
+- code-review --fix applied: [yes/no]
+- ux-review source: [changed files / fallback]
+
+## Cigarette Stop Evidence
+- Iteration / workflow: [run name]
+- Counts this cycle: Cancer X, Polyp Y, Cigarette Z
+- Cigarette fixed now: [list]
+- Remaining Cigarette items: [list or none]
+- Cleanup attempted: [what was tried]
+- Zero Cancer / Polyp confirmation: [yes/no]
+- Stop streak status: [counts toward streak / resets streak / wait for more evidence]
+
 ## Summary
 | Review | Findings |
 |---|---|
-| code-review | MUST-FIX X, SHOULD-FIX Y, NIT Z |
-| ux-review | Quick Win X, Major Y, Nice-to-have Z |
-| pathology | Cigarette X, Polyp Y, Cancer Z |
+| code-review | Cancer X, Polyp Y, Cigarette Z |
+| ux-review | Cancer X, Polyp Y, Cigarette Z |
+| pathology | Cancer X, Polyp Y, Cigarette Z |
 
 ## code-review
 ...
@@ -34,7 +53,7 @@ Run `code-review` and `ux-review` independently, then merge the results.
 ...
 
 ## Routing
-- Recommended PD tier: PD 1 | PD 3 | PD 5 | PD 7 | PD 9
+- Recommended PD tier: PD 1 | PD 3 | PD 5 | PD 7
 - Reason: scope, severity, pathology, and confidence
 ```
 
@@ -43,4 +62,6 @@ Run `code-review` and `ux-review` independently, then merge the results.
 - Keep review tracks independent until reporting.
 - If the security gate blocks code review, report the block without exposing raw secrets.
 - UX review may continue if it can do so without exposing secrets.
+- If `--fix` was used, report whether code-review actually ran with `--fix` and what evidence shows it.
 - Any Cancer finding escalates the recommended workflow to PD 7.
+- Cigarette findings are part of the immediate fix set, not the skip set. Report cycle counts, Cigarette items fixed now, remaining Cigarette items, cleanup attempt, and zero Cancer / Polyp confirmation before counting a streak.

@@ -1,12 +1,12 @@
 ---
 name: pd5
-description: PD 5 — 중규모 변경 출하. SUX_review + 실행형 테스트 + 빌드 + orev 리뷰.
+description: PD 5, 중규모 변경 출하. SUX_review + independent reviewer gate + 실행형 테스트 + 빌드 + orev 결정론적 artifact gate.
 user-invocable: true
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 argument-hint: "[선택: 커밋 메시지 힌트]"
 ---
 
-# /pd5 — Ship Candidate
+# /pd5: Ship Candidate
 
 중규모 변경, 원샷 구현이 확실하지 않은 작업에 사용한다.
 
@@ -23,6 +23,8 @@ PD 5 이상은 구현 전에 `/grill-me`로 설계를 검증하는 것을 권장
 
 ## 실행 절차
 
+이 섹션에서 호출하는 nested workflow는 runtime의 공식 skill/command invocation mechanism으로 실행해야 한다. 그래야 해당 SKILL.md가 로드된다.
+
 ### Step 1: Privacy Gate
 
 ```bash
@@ -31,10 +33,14 @@ orev privacy gate . --verbose
 
 ### Step 2: SUX Review (Code + UX 병렬)
 
-`/SUX_review --fix` 스킬을 실행한다.
-- code-review + ux-review 병렬 Agent 호출
+`/SUX_review --fix` 스킬을 runtime의 공식 skill/command invocation mechanism으로 실행한다.
+- code-review + ux-review 병렬 nested skill 호출
+- 실행 증거를 남긴다. invocation method, changed-files basis, `--fix` 적용 여부를 기록한다.
 - 모든 finding에 Cigarette/Polyp/Cancer 분류
-- MUST-FIX + SHOULD-FIX + Quick Win 전부 수정
+- legacy: MUST-FIX / SHOULD-FIX / NIT, Quick Win / Major / Nice-to-have 메타데이터는 보조 정보로만 남긴다.
+- Cancer 발견 → 즉시 중단. PD 7로 mandatory escalation을 기록하고, PD 5 테스트/빌드/커밋/PR 단계로 진행하지 않는다. Cancer-class issue를 수정한 뒤에도 PD 5로 재개하지 말고 PD 7에서 재검증한다.
+- Polyp 발견 → 현재 패스에서 수정하고, Polyp 0건이 될 때까지 independent reviewer, tests, build, commit, PR 단계로 진행하지 않는다.
+- Cigarette 발견은 현재 패스에서 수정하고, 보고서에 cycle evidence, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation을 남긴다.
 
 ### Step 3: 실행형 테스트
 
@@ -49,20 +55,40 @@ orev privacy gate . --verbose
 pnpm run build
 ```
 
-### Step 5: orev 리뷰 (커밋 전)
+### Step 5: orev 결정론적 artifact gate (커밋 전)
 
-**반드시 커밋 전에 실행** — 커밋 후에는 diff가 비어서 리뷰 불가.
+**반드시 커밋 전에 실행**. 커밋 후에는 diff가 비어서 리뷰 불가.
+이 단계는 semantic approval가 아니다. semantic review는 Step 6의 independent reviewer gate가 담당한다.
 
 ```bash
 TMP_DIR=$(mktemp -d /tmp/orev-pd5-review.XXXXXX)
 orev review . --out "$TMP_DIR/pd5-review.md" --verbose
 ```
 
-orev 실패 시 Claude Code 직접 분석 fallback.
+deterministic 결과만 본다. secret, privacy, context, report issue가 있으면 수정하고 테스트/빌드/orev를 다시 실행한다.
 
-### Step 6: Commit & PR
+orev 실패 시 중단하고 실패 원인을 보고한다. 직접 same-agent 분석은 참고 자료일 뿐, deterministic artifact gate를 대체하지 않는다.
 
-`/commit` 스킬을 실행한다.
+### Step 6: Independent Reviewer Gate (final immutable diff)
+
+Mandatory release gate. The implementing agent must not be the final semantic reviewer.
+
+- Run this gate only after SUX fixes, executable tests, build, and clean `orev review` artifact generation have completed without requiring more tracked-file changes.
+- Freeze the exact reviewed diff before invoking the reviewer. Record the base SHA/ref, head SHA or current worktree snapshot, changed-files basis, and artifact paths.
+- Run semantic review with an independent reviewer model or hosted review runtime.
+- Default supported setup path: `docs/EXTERNAL_REVIEWERS.md`, using `codex exec review --base <base> --uncommitted --model <model> --json -o <receipt.md>` for the normal pre-commit gate or an equivalent hosted reviewer receipt.
+- Use privacy-gated `orev` artifacts and selected source context as input.
+- Local self-review, direct same-agent analysis, and deterministic `orev review` output are supporting evidence only; they do not count as release approval.
+- If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
+- Report reviewer identity, invocation evidence, reviewed artifacts, immutable diff scope, and Cancer/Polyp/Cigarette counts.
+- If the independent reviewer reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7. Do not continue under PD 5 after fixing a Cancer-class issue.
+- If the independent reviewer reports Polyp findings, stop before commit or PR, fix the findings, rerun SUX_review, tests/build/orev as applicable, and rerun the independent reviewer gate against the updated final diff. PD 5 may proceed only when independent reviewer Cancer and Polyp counts are 0.
+- If the independent reviewer reports Cigarette-only findings, fix them in the current pass, rerun tests/build/orev as applicable, and rerun this gate unless the finding required no tracked-file change. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before reviewer rerun. Count these as Cigarette-only review/fix cycles; after 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp, stop the loop and report remaining Cigarette risk instead of blocking release indefinitely.
+- Any tracked-file change after reviewer approval invalidates the receipt. Rerun this gate against the updated final diff before continuing.
+
+### Step 7: Commit & PR
+
+- `/commit` 스킬을 runtime의 공식 skill/command invocation mechanism으로 실행한다.
 
 ### 디버깅
 
@@ -72,9 +98,15 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 
 - [ ] privacy gate ALLOW
 - [ ] SUX_review 실행 + finding 수정
+- [ ] Cancer 0건 확인 또는 PD 7 mandatory escalation으로 중단
 - [ ] 테스트 전체 통과
 - [ ] 빌드 성공
-- [ ] orev 리뷰 완료
+- [ ] orev 결정론적 gate 완료, clean artifact path 기록
+- [ ] independent reviewer gate가 최종 immutable diff 기준으로 통과, self-review가 approval로 계산되지 않았다는 증거
+- [ ] reviewer receipt에 base/head 또는 snapshot, changed-files basis, artifact path 기록
+- [ ] independent reviewer Cancer 0 / Polyp 0 확인, reviewer-driven tracked-file fixes는 SUX_review/tests/build/orev/reviewer 재검증 완료
+- [ ] reviewer approval 이후 tracked-file change 없음 또는 gate 재실행 완료
+- [ ] /commit skill 또는 command invocation 증거
 - [ ] PR 생성됨
 
 ## 보고서
@@ -83,11 +115,13 @@ orev 실패 시 Claude Code 직접 분석 fallback.
 PD 5 완료!
 1. Privacy Gate: ALLOW
 2. SUX Review:
-   - code-review: Cigarette N, Polyp N → 수정
-   - ux-review: Quick Win N, Major N → 수정
+   - code-review: Cancer 0, Polyp N, Cigarette N → Polyp/Cigarette 현재 패스 수정
+   - ux-review: Cancer 0, Polyp N, Cigarette N → Polyp/Cigarette 현재 패스 수정
+   - Cycle evidence: [iteration/workflow name, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation]
 3. 테스트: N개 통과 (Ns)
 4. 빌드: 통과
-5. 커밋: <해시> <메시지>
-6. PR: <URL>
-7. orev 리뷰: [클린|수정|에스컬레이션]
+5. orev 결정론적 gate: [클린 artifact path|issue 수정|에스컬레이션]
+6. Independent reviewer gate: [reviewer/runtime, invocation evidence, immutable diff scope, orev artifact path, result]
+7. 커밋: /commit skill 또는 command invocation, <해시> <메시지>
+8. PR: <URL>
 ```

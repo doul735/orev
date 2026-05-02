@@ -12,7 +12,7 @@ small change      -> /pd1
 normal bugfix     -> /pd3
 feature work      -> /pd5
 release proof     -> /pd7
-auth/payment/data -> /pd9
+auth/payment/data -> /pd7
 ```
 
 ## Why
@@ -24,7 +24,9 @@ AI coding agents make code changes fast. Release discipline still has to be deli
 - block secrets before review
 - collect deterministic diff and context artifacts locally
 - review code and UX separately
-- classify findings by spread risk: Cigarette, Polyp, Cancer
+- classify findings by spread risk using the canonical pathology taxonomy: Cancer, Polyp, Cigarette
+- fix Cigarette findings in the current pass, and stop only after 3 consecutive Cigarette-only review/fix cycles with documented evidence
+- require independent reviewer approval for PD 5 and PD 7; self-review by the implementing agent does not count
 - choose a PD tier based on change risk
 - verify with tests/build before release
 
@@ -76,11 +78,11 @@ The CLI prepares safe local artifacts. The skills orchestrate review, fixes, tes
 
 | Tier | Use For | Gate |
 |---|---|---|
-| PD 1 | docs, config, one-liners | privacy gate |
+| PD 1 | docs, config, one-liners, current-pass Cigarette cleanup | privacy gate |
 | PD 3 | normal feature or bug fix | code review + type check |
-| PD 5 | medium feature work | SUX review + tests + build |
-| PD 7 | large or high-confidence release | full verification + E2E when needed |
-| PD 9 | auth, payment, security, data migration | Cancer-zero required |
+| PD 5 | medium feature work | SUX review + independent reviewer + tests + build |
+| PD 7 | large, high-confidence, auth/payment/security/data release | full verification + independent reviewer + applicable E2E/equivalent proof + architecture + Cancer-zero |
+| PD 9 | reserved slot | custom community or organization variant |
 
 Even-numbered tiers, PD 2/4/6/8, are open slots for community variants.
 
@@ -90,11 +92,11 @@ Review findings are classified by spread risk:
 
 | Class | Meaning | Response |
 |---|---|---|
-| Cigarette | Small harmful habit | clean up before it normalizes |
-| Polyp | Localized actionable risk | fix before release |
 | Cancer | Systemic or release-blocking risk | contain, verify, escalate |
+| Polyp | Localized actionable risk | fix before release |
+| Cigarette | Small harmful habit | fix in the current pass, document evidence, and stop only after 3 consecutive Cigarette-only review/fix cycles |
 
-This does not replace `MUST-FIX`, `SHOULD-FIX`, or `NIT`. It explains how hard the issue can spread.
+This does not replace `MUST-FIX`, `SHOULD-FIX`, or `NIT` during migration. Pathology is the canonical release taxonomy, and legacy labels remain secondary metadata only. Cigarette findings are not skipped by default, they are fixed in the current pass, then counted toward the 3-cycle stop rule only when the report also shows zero Cancer and zero Polyp findings with evidence.
 
 ## Skill Commands
 
@@ -103,9 +105,9 @@ Install or adapt the skill files under `skills/` into your agent runtime.
 ```text
 /pd1          # docs, config, one-liner
 /pd3          # normal feature/bug fix
-/pd5          # medium scope, tests + build
-/pd7          # large scope, full verification
-/pd9          # critical auth/payment/data/security work
+/pd5          # medium scope, independent reviewer + tests + build
+/pd7          # large/auth/payment/data/security, full verification
+/pd9          # reserved custom variant slot
 
 /code-review  # code quality + security
 /ux-review    # UX gap analysis
@@ -114,16 +116,18 @@ Install or adapt the skill files under `skills/` into your agent runtime.
 
 Deprecated `ship` and `ship7` templates are kept under `skills/_deprecated/` for migration reference only.
 
-## Optional Hosted Review
+## Independent Review
 
-If OMO, OhMyOpenCode, or another hosted review runtime is available, it can consume `orev` artifacts for adversarial review:
+For PD 5 and PD 7, an independent reviewer model or hosted review runtime must consume `orev` artifacts for adversarial review:
 
 1. `orev` creates privacy-gated local artifacts.
 2. The hosted review runtime reads those artifacts and selected source files.
 3. A stronger review model performs adversarial review through that runtime.
 4. The skill suite verifies findings, applies selected fixes, and runs tests/build before release.
 
-Hosted review is optional. The deterministic CLI and PD workflow can be used without it.
+Self-review by the implementing agent, direct same-agent fallback, and deterministic `orev review` output are supporting evidence only. They do not count as PD 5/7 release approval.
+
+See [External Reviewer Setup](./docs/EXTERNAL_REVIEWERS.md) for the supported Codex CLI receipt path and required evidence.
 
 ## CLI Reference
 

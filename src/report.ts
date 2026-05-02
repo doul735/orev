@@ -1,4 +1,4 @@
-import type { AiReviewResult, ReviewResult, SecretFinding, UxFindingCategory } from "./types.js";
+import type { AiFinding, AiReviewResult, PathologyClass, ReviewResult, SecretFinding, UxFinding } from "./types.js";
 
 function bullet(value: string): string {
   return `- ${value}`;
@@ -19,18 +19,46 @@ function formatUxLocation(file: string | undefined, line: number | undefined): s
   return `\`${file}${line === undefined ? "" : `:${line}`}\``;
 }
 
-function renderUxItems(ai: AiReviewResult, category: UxFindingCategory): string {
-  if (ai.review?.mode !== "ux") {
-    return "- 없음";
-  }
-  const findings = ai.review.findings.filter((finding) => finding.category === category);
+const pathologies: PathologyClass[] = ["Cancer", "Polyp", "Cigarette"];
+
+function renderPathologySummary(ai: AiReviewResult): string {
+  const counts = ai.review?.pathologyCounts ?? { Cancer: 0, Polyp: 0, Cigarette: 0 };
+  return [`- Cancer: ${counts.Cancer}`, `- Polyp: ${counts.Polyp}`, `- Cigarette: ${counts.Cigarette}`].join("\n");
+}
+
+function renderUxPathologyItems(findings: UxFinding[]): string {
   if (findings.length === 0) {
     return "- 없음";
   }
   return findings.map((finding) => {
     const location = formatUxLocation(finding.file, finding.line);
-    return `- **${finding.title}**\n  - 관점: ${finding.lens}\n  - 현재: ${finding.current}\n  - 제안: ${finding.suggestion}\n  - 위치: ${location}\n  - 신뢰도: ${finding.confidence}`;
+    return `- **${finding.title}**\n  - 관점: ${finding.lens}\n  - 노력 메타데이터: ${finding.category}\n  - 현재: ${finding.current}\n  - 제안: ${finding.suggestion}\n  - Blast radius: ${finding.blastRadius}\n  - Infection path: ${finding.infectionPath}\n  - Containment: ${finding.containment}\n  - 위치: ${location}\n  - 신뢰도: ${finding.confidence}`;
   }).join("\n");
+}
+
+function renderCodePathologyItems(findings: AiFinding[]): string {
+  if (findings.length === 0) {
+    return "- 없음";
+  }
+  return findings.map((finding) => {
+    const location = formatUxLocation(finding.file, finding.line);
+    return `- **${finding.title}**\n  - 차원: ${finding.dimension}\n  - Severity metadata: ${finding.severity}\n  - Evidence: ${finding.evidence}\n  - Recommendation: ${finding.recommendation}\n  - Blast radius: ${finding.blastRadius}\n  - Infection path: ${finding.infectionPath}\n  - Containment: ${finding.containment}\n  - 위치: ${location}\n  - 신뢰도: ${finding.confidence}`;
+  }).join("\n");
+}
+
+function renderPathologySections(ai: AiReviewResult): string {
+  if (ai.review === undefined) {
+    return pathologies.map((pathology) => `### ${pathology}\n\n- 없음`).join("\n\n");
+  }
+  const { review } = ai;
+  if (review.mode === "ux") {
+    return pathologies
+      .map((pathology) => `### ${pathology}\n\n${renderUxPathologyItems(review.findings.filter((finding) => finding.pathology === pathology))}`)
+      .join("\n\n");
+  }
+  return pathologies
+    .map((pathology) => `### ${pathology}\n\n${renderCodePathologyItems(review.findings.filter((finding) => finding.pathology === pathology))}`)
+    .join("\n\n");
 }
 
 function renderUxAiSection(ai: AiReviewResult): string {
@@ -45,12 +73,7 @@ function renderUxAiSection(ai: AiReviewResult): string {
   if (ai.status !== "success" || ai.review?.mode !== "ux") {
     return `\n## 기획 리뷰: UX mode\n\n${metadata}\n- Reason: ${ai.reason ?? "AI UX review did not complete."}\n\nNo UX findings were added.\n`;
   }
-  const counts = {
-    quickWin: ai.review.findings.filter((finding) => finding.category === "quickWin").length,
-    major: ai.review.findings.filter((finding) => finding.category === "major").length,
-    niceToHave: ai.review.findings.filter((finding) => finding.category === "niceToHave").length
-  };
-  return `\n## 기획 리뷰: ${ai.review.target}\n\n${metadata}\n\n### 요약\n\n${ai.review.summary}\n\n- Quick Win: ${counts.quickWin}\n- Major: ${counts.major}\n- Nice-to-have: ${counts.niceToHave}\n\n### 🟢 Quick Win\n\n${renderUxItems(ai, "quickWin")}\n\n### 🟡 Major\n\n${renderUxItems(ai, "major")}\n\n### 🔵 Nice-to-have\n\n${renderUxItems(ai, "niceToHave")}\n`;
+  return `\n## 기획 리뷰: ${ai.review.target}\n\n${metadata}\n\n### 요약\n\n${ai.review.summary}\n\n### Pathology Summary\n\n${renderPathologySummary(ai)}\n\n${renderPathologySections(ai)}\n`;
 }
 
 function renderAiSection(ai: AiReviewResult | undefined): string {
@@ -74,13 +97,7 @@ function renderAiSection(ai: AiReviewResult | undefined): string {
   const dimensions = ai.review.dimensions
     .map((dimension) => `- **${dimension.dimension}** (${dimension.risk}): ${dimension.summary}`)
     .join("\n");
-  const findings = ai.review.findings.length === 0
-    ? "- No AI findings returned."
-    : ai.review.findings.map((finding) => {
-      const location = finding.file === undefined ? "" : ` (\`${finding.file}${finding.line === undefined ? "" : `:${finding.line}`}\`)`;
-      return `- **${finding.severity.toUpperCase()}** ${finding.dimension}${location}: ${finding.title} — ${finding.evidence} Recommendation: ${finding.recommendation} Confidence: ${finding.confidence}`;
-    }).join("\n");
-  return `\n## AI Verified Review\n\n${metadata}\n- Overall risk: ${ai.review.overallRisk}\n- Summary: ${ai.review.summary}\n\n### Dimension summaries\n\n${dimensions}\n\n### AI findings\n\n${findings}\n`;
+  return `\n## AI Verified Review\n\n${metadata}\n- Overall risk metadata: ${ai.review.overallRisk}\n- Summary: ${ai.review.summary}\n\n### Pathology Summary\n\n${renderPathologySummary(ai)}\n\n${renderPathologySections(ai)}\n\n### Dimension summaries\n\n${dimensions}\n`;
 }
 
 export function renderMarkdownReport(result: ReviewResult): string {

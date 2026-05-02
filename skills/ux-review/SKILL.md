@@ -32,17 +32,20 @@ Review changed code for product completeness and UX gaps. This is not a security
 
 4. Classify findings:
 
-   - Quick Win: high impact, low effort
-   - Major: high impact, higher effort
-   - Nice-to-have: lower impact, low effort
-
-5. Assign a pathology class:
-
+   - Cancer: release blocking or trust breaking UX failure
+   - Polyp: localized flow gap that should be fixed before release
    - Cigarette: small UX habit or polish gap that compounds over time
-   - Polyp: localized flow or state gap that should be fixed before release
-   - Cancer: systemic UX failure that breaks a core path or user trust
+   - effort metadata: quick, medium, high
 
-6. If a hosted review runtime is available, run UX review from the artifacts and source context. Otherwise, perform local agent analysis and mark the report as fallback.
+5. Quick Win is effort metadata, not a risk class.
+
+6. Confirm pathology definitions:
+
+   - Cancer: systemic UX failure that breaks a core path or user trust
+   - Polyp: localized flow or state gap that should be fixed before release
+   - Cigarette: small UX habit or polish gap that compounds over time
+
+7. If a hosted review runtime is available, run UX review from the artifacts and source context. Otherwise, perform local agent analysis and mark the report as fallback. Fallback self-review does not count as PD 5 or PD 7 release approval.
 
 ## Report Format
 
@@ -51,15 +54,48 @@ Review changed code for product completeness and UX gaps. This is not a security
 
 ### Summary
 - Files reviewed: N
-- Findings: N (Quick Win X, Major Y, Nice-to-have Z)
-- Pathology: Cigarette X, Polyp Y, Cancer Z
+- Findings: N (Cancer X, Polyp Y, Cigarette Z)
+- Pathology: Cancer X, Polyp Y, Cigarette Z
 
-### Quick Win
+### Cigarette Stop Evidence
+- Iteration / workflow: [run name]
+- Counts this cycle: Cancer X, Polyp Y, Cigarette Z
+- Cigarette fixed now: [list]
+- Remaining Cigarette items: [list or none]
+- Cleanup attempted: [what was tried]
+- Zero Cancer / Polyp confirmation: [yes/no]
+- Stop streak status: [counts toward streak / resets streak / wait for more evidence]
+
+### Cancer
 1. **Title** — lens: state handling
    - Current: ...
    - Suggestion: ...
-   - Pathology: Polyp — blast radius / infection path / containment
+   - effort: high
+   - legacy: Major
+   - Pathology: Cancer, blast radius / infection path / containment
    - Location: `file:line`
+
+### Polyp
+1. **Title** — lens: state handling
+   - Current: ...
+   - Suggestion: ...
+   - effort: medium
+   - legacy: Quick Win | Major
+   - Pathology: Polyp, blast radius / infection path / containment
+   - Location: `file:line`
+
+### Cigarette
+1. **Title** — lens: state handling
+    - Current: ...
+    - Suggestion: ...
+    - effort: quick
+    - legacy: Nice-to-have
+    - Pathology: Cigarette, blast radius / infection path / containment
+    - Fix this pass: yes
+    - Remaining Cigarette items: ...
+    - Cleanup attempt: ...
+    - Zero Cancer / Polyp confirmation: yes
+    - Location: `file:line`
 ```
 
 ## Rules
@@ -68,3 +104,4 @@ Review changed code for product completeness and UX gaps. This is not a security
 - Include file and line references where possible.
 - Do not call direct provider APIs by default.
 - Escalate Cancer findings to PD 7.
+- Cigarette findings are fixed in the current pass when a fix workflow is used, and the report must document cycle evidence, counts, cleanup attempt, remaining items, and zero Cancer / Polyp confirmation before counting the streak.

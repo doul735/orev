@@ -10,23 +10,23 @@ PD tiers are workflow skills with escalating verification depth:
 |---|---|
 | `/pd1` | Hygiene pass for docs, config, one-liner changes |
 | `/pd3` | Standard review for normal feature/bug fix work |
-| `/pd5` | Medium scope — SUX_review + tests + build |
-| `/pd7` | Large scope — full verification with E2E |
-| `/pd9` | Full package — auth/payment/security, Cancer-zero required |
+| `/pd5` | Medium scope — SUX_review + independent reviewer + tests + build |
+| `/pd7` | Highest default verification — auth/payment/security/data, Cancer-zero, applicable E2E/equivalent proof, architecture |
+| `/pd9` | Reserved custom variant slot |
 
 Even-numbered tiers (PD 2, 4, 6, 8) are open slots for community-contributed variants.
 
 ## Pathology Model
 
-The PD series uses three pathology classes to explain why a finding matters:
+The PD series uses three pathology classes as the canonical routing and release taxonomy:
 
 | Class | Meaning | Workflow Response |
 |---|---|---|
-| Cigarette | Small harmful habit. Not urgent alone, but harmful when repeated. | PD 1 or PD 3 cleanup |
+| Cancer | Invasive/systemic risk. Can compromise release, data, security, or trust. | PD 7 containment and rerun verification |
 | Polyp | Localized abnormal growth. Actionable before it spreads. | PD 3 or PD 5 fix-before-release |
-| Cancer | Invasive/systemic risk. Can compromise release, data, security, or trust. | PD 7/9 containment and rerun verification |
+| Cigarette | Small harmful habit. Not urgent alone, but harmful when repeated. | Fix in the current pass, document evidence, and stop only after 3 consecutive Cigarette-only review/fix cycles |
 
-Pathology is a routing lens. It does not replace MUST-FIX, SHOULD-FIX, NIT, Quick Win, Major, or Nice-to-have.
+Legacy labels such as MUST-FIX, SHOULD-FIX, NIT, Quick Win, Major, and Nice-to-have may appear during migration, but only as secondary metadata. Cigarette is not a skip class, it is current-pass cleanup with a 3-cycle stop rule.
 
 ## Public Scope
 
@@ -45,7 +45,7 @@ Publish these components together:
 - block secrets before AI review
 - keep code review and UX review separate
 - run tests/builds before merge
-- support optional hosted adversarial review
+- require independent adversarial review for PD 5 and PD 7
 - keep direct provider/API review experimental and self-hosted
 
 ## Repository Shape
