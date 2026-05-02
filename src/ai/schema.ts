@@ -72,15 +72,30 @@ function pathologyFromSeverity(severity: AiReviewSeverity): PathologyClass {
   return "Cigarette";
 }
 
-function pathologyFromUxCategory(category: UxFindingCategory): PathologyClass {
-  return category === "major" ? "Polyp" : "Cigarette";
-}
-
 function countsForFindings(findings: Array<{ pathology: PathologyClass }>): PathologyCounts {
   return findings.reduce<PathologyCounts>((counts, finding) => {
     counts[finding.pathology] += 1;
     return counts;
   }, { Cancer: 0, Polyp: 0, Cigarette: 0 });
+}
+
+function parsePathologyCounts(value: unknown): PathologyCounts | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+  const counts: Partial<PathologyCounts> = {};
+  for (const pathology of pathologies) {
+    const count = value[pathology];
+    if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
+      return undefined;
+    }
+    counts[pathology] = count;
+  }
+  return counts as PathologyCounts;
+}
+
+function countsMatch(expected: PathologyCounts, actual: PathologyCounts): boolean {
+  return pathologies.every((pathology) => expected[pathology] === actual[pathology]);
 }
 
 function isUxLens(value: unknown): value is UxReviewLens {
@@ -177,7 +192,12 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
     throw new Error("AI response contains an invalid finding");
   }
   const typedFindings = findings.filter((finding): finding is AiFinding => finding !== undefined);
-  const pathologyCounts = countsForFindings(typedFindings);
+  const derivedCounts = countsForFindings(typedFindings);
+  const suppliedCounts = parsePathologyCounts(parsed.pathologyCounts);
+  if (parsed.schemaVersion === 2 && (suppliedCounts === undefined || !countsMatch(suppliedCounts, derivedCounts))) {
+    throw new Error("AI response pathology counts do not match findings");
+  }
+  const pathologyCounts = suppliedCounts ?? derivedCounts;
 
   return {
     mode: "code",
@@ -190,7 +210,7 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
   };
 }
 
-function parseUxFinding(value: unknown, allowLegacyPathology: boolean): UxFinding | undefined {
+function parseUxFinding(value: unknown): UxFinding | undefined {
   if (!isRecord(value)
     || !isUxLens(value.lens)
     || !isUxCategory(value.category)
@@ -209,13 +229,13 @@ function parseUxFinding(value: unknown, allowLegacyPathology: boolean): UxFindin
   if (value.line !== undefined && (typeof value.line !== "number" || !Number.isInteger(value.line) || value.line <= 0)) {
     return undefined;
   }
-  const pathology = isPathology(value.pathology) ? value.pathology : allowLegacyPathology ? pathologyFromUxCategory(value.category) : undefined;
+  const pathology = isPathology(value.pathology) ? value.pathology : undefined;
   if (pathology === undefined) {
     return undefined;
   }
-  const blastRadius = isString(value.blastRadius) ? value.blastRadius : allowLegacyPathology ? "Derived from legacy schema v1 UX category metadata." : undefined;
-  const infectionPath = isString(value.infectionPath) ? value.infectionPath : allowLegacyPathology ? "Legacy schema v1 did not provide infection path details." : undefined;
-  const containment = isString(value.containment) ? value.containment : allowLegacyPathology ? value.suggestion : undefined;
+  const blastRadius = isString(value.blastRadius) ? value.blastRadius : undefined;
+  const infectionPath = isString(value.infectionPath) ? value.infectionPath : undefined;
+  const containment = isString(value.containment) ? value.containment : undefined;
   if (blastRadius === undefined || infectionPath === undefined || containment === undefined) {
     return undefined;
   }
@@ -241,7 +261,7 @@ function parseUxFinding(value: unknown, allowLegacyPathology: boolean): UxFindin
 }
 
 function parseUxReview(parsed: unknown): UxReviewSuccess {
-  if (!isRecord(parsed) || (parsed.schemaVersion !== 2 && parsed.schemaVersion !== 1) || !isString(parsed.target) || !isString(parsed.summary)) {
+  if (!isRecord(parsed) || parsed.schemaVersion !== 2 || !isString(parsed.target) || !isString(parsed.summary)) {
     throw new Error("AI UX response schema mismatch");
   }
   if ("dimensions" in parsed || "overallRisk" in parsed) {
@@ -250,13 +270,17 @@ function parseUxReview(parsed: unknown): UxReviewSuccess {
   if (!Array.isArray(parsed.findings)) {
     throw new Error("AI UX response findings must be an array");
   }
-  const allowLegacyPathology = parsed.schemaVersion === 1;
-  const findings = parsed.findings.map((finding) => parseUxFinding(finding, allowLegacyPathology));
+  const findings = parsed.findings.map(parseUxFinding);
   if (findings.some((finding) => finding === undefined)) {
     throw new Error("AI UX response contains an invalid finding");
   }
   const typedFindings = findings.filter((finding): finding is UxFinding => finding !== undefined);
-  const pathologyCounts = countsForFindings(typedFindings);
+  const derivedCounts = countsForFindings(typedFindings);
+  const suppliedCounts = parsePathologyCounts(parsed.pathologyCounts);
+  if (suppliedCounts === undefined || !countsMatch(suppliedCounts, derivedCounts)) {
+    throw new Error("AI UX response pathology counts do not match findings");
+  }
+  const pathologyCounts = suppliedCounts;
 
   return {
     mode: "ux",
