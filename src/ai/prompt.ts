@@ -40,7 +40,7 @@ Rules:
 - Keep evidence specific and quote only small snippets.
 - Use an empty findings array when no supported finding exists.
 - Cancer/Polyp/Cigarette are the primary release taxonomy. severity and risk are secondary metadata only.
-- pathologyCounts must exactly match the findings array.
+- pathologyCounts should match the findings array; orev derives final receipt counts from validated findings.
 - For each finding, explain blastRadius, infectionPath, and containment concretely.
 - Include exactly the six dimensions listed above.
 
@@ -95,7 +95,7 @@ Rules:
 - Do not invent files, lines, screens, or behavior not supported by the provided context.
 - Use an empty findings array when no supported UX finding exists.
 - Cancer/Polyp/Cigarette are the primary release taxonomy. quickWin/major/niceToHave are effort metadata only.
-- pathologyCounts must exactly match the findings array.
+- pathologyCounts should match the findings array; orev derives final receipt counts from validated findings.
 - Every finding must include one of the seven lenses, one of the three categories, and concrete blastRadius/infectionPath/containment fields.
 - Keep current and suggestion concrete enough to paste into a UX review report.
 

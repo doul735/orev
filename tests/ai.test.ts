@@ -373,6 +373,38 @@ describe("AI review orchestration", () => {
     expect(markdown).toContain("AI response schema mismatch");
   });
 
+  it("derives pathology counts from valid findings instead of trusting provider summary counts", async () => {
+    const repo = await createGitFixture();
+    await writeFile(path.join(repo, "app.ts"), "export const value = 52;\n");
+    const parsed = JSON.parse(successResponse()) as Record<string, unknown>;
+    delete parsed.pathologyCounts;
+    const provider = new FakeProvider(JSON.stringify(parsed));
+
+    const { result, markdown } = await runReview({
+      target: repo,
+      out: path.join(tempRoot, "derived-counts.md"),
+      format: "markdown",
+      maxFiles: 10,
+      maxBytes: 10000,
+      includeTests: false,
+      failOnSecrets: true,
+      verbose: false,
+      ai: {
+        enabled: true,
+        mode: "code",
+        model: "claude",
+        maxAiContextBytes: 120000,
+        maxAiOutputTokens: 3000,
+        aiTimeoutMs: 60000,
+        provider
+      }
+    });
+
+    expect(result.ai?.status).toBe("success");
+    expect(result.ai?.review?.pathologyCounts).toEqual({ Cancer: 0, Polyp: 1, Cigarette: 0 });
+    expect(markdown).toContain("- Polyp: 1");
+  });
+
   it("fails closed when UX mode receives the code review schema", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 51;\n");

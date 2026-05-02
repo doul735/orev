@@ -62,30 +62,11 @@ function isPathology(value: unknown): value is PathologyClass {
   return typeof value === "string" && pathologies.includes(value as PathologyClass);
 }
 
-function parsePathologyCounts(value: unknown): PathologyCounts | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-  const counts: Partial<PathologyCounts> = {};
-  for (const pathology of pathologies) {
-    const count = value[pathology];
-    if (typeof count !== "number" || !Number.isInteger(count) || count < 0) {
-      return undefined;
-    }
-    counts[pathology] = count;
-  }
-  return counts as PathologyCounts;
-}
-
 function countsForFindings(findings: Array<{ pathology: PathologyClass }>): PathologyCounts {
   return findings.reduce<PathologyCounts>((counts, finding) => {
     counts[finding.pathology] += 1;
     return counts;
   }, { Cancer: 0, Polyp: 0, Cigarette: 0 });
-}
-
-function countsMatch(expected: PathologyCounts, actual: PathologyCounts): boolean {
-  return pathologies.every((pathology) => expected[pathology] === actual[pathology]);
 }
 
 function isUxLens(value: unknown): value is UxReviewLens {
@@ -155,10 +136,6 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
   if (!isRecord(parsed) || parsed.schemaVersion !== 2 || !isRisk(parsed.overallRisk) || !isString(parsed.summary)) {
     throw new Error("AI response schema mismatch");
   }
-  const pathologyCounts = parsePathologyCounts(parsed.pathologyCounts);
-  if (pathologyCounts === undefined) {
-    throw new Error("AI response pathology counts are invalid");
-  }
   if (!Array.isArray(parsed.dimensions) || parsed.dimensions.length !== aiDimensions.length) {
     throw new Error("AI response must include exactly six dimensions");
   }
@@ -179,9 +156,7 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
     throw new Error("AI response contains an invalid finding");
   }
   const typedFindings = findings.filter((finding): finding is AiFinding => finding !== undefined);
-  if (!countsMatch(pathologyCounts, countsForFindings(typedFindings))) {
-    throw new Error("AI response pathology counts do not match findings");
-  }
+  const pathologyCounts = countsForFindings(typedFindings);
 
   return {
     mode: "code",
@@ -242,10 +217,6 @@ function parseUxReview(parsed: unknown): UxReviewSuccess {
   if (!isRecord(parsed) || parsed.schemaVersion !== 2 || !isString(parsed.target) || !isString(parsed.summary)) {
     throw new Error("AI UX response schema mismatch");
   }
-  const pathologyCounts = parsePathologyCounts(parsed.pathologyCounts);
-  if (pathologyCounts === undefined) {
-    throw new Error("AI UX response pathology counts are invalid");
-  }
   if ("dimensions" in parsed || "overallRisk" in parsed) {
     throw new Error("AI UX response schema mismatch");
   }
@@ -257,9 +228,7 @@ function parseUxReview(parsed: unknown): UxReviewSuccess {
     throw new Error("AI UX response contains an invalid finding");
   }
   const typedFindings = findings.filter((finding): finding is UxFinding => finding !== undefined);
-  if (!countsMatch(pathologyCounts, countsForFindings(typedFindings))) {
-    throw new Error("AI UX response pathology counts do not match findings");
-  }
+  const pathologyCounts = countsForFindings(typedFindings);
 
   return {
     mode: "ux",
