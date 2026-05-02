@@ -13,8 +13,8 @@ pd5 / pd7
        -> ux-review
   -> tests/build/E2E as required by tier
   -> orev review before commit
-  -> mandatory independent adversarial review for PD 5/7 against final diff + orev artifacts
   -> commit/PR
+  -> mandatory post-PR GitHub Codex review for PD 5/7 before merge
 
 orev CLI
   -> privacy gate
@@ -25,9 +25,9 @@ orev CLI
 
 ## Production Review Path
 
-Hosted adversarial review can run through OMO/OhMyOpenCode or another external review runtime. The target project does not need `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `--model claude` for the default deterministic workflow.
+Post-PR adversarial review for PD 5 and PD 7 runs through the official GitHub Codex reviewer/plugin. The target project does not need `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `--model claude` for the default deterministic workflow.
 
-The direct provider path, `orev review --ai`, remains experimental/self-hosted supporting evidence only. It is not a PD 5 or PD 7 release-approval fallback; use the independent reviewer setup in `docs/EXTERNAL_REVIEWERS.md` for that gate.
+The direct provider path, `orev review --ai`, and any Codex CLI preflight receipt remain supporting evidence only. They are not PD 5 or PD 7 post-PR merge-gate fallbacks; use the GitHub Codex setup in `docs/EXTERNAL_REVIEWERS.md` for that gate.
 
 ## Stages
 
