@@ -93,7 +93,7 @@ describe("public package documentation", () => {
 
     expect(externalReviewers).toContain("PD 5 and PD 7 require an official post-PR GitHub Codex reviewer/plugin merge gate");
     expect(externalReviewers).toContain("PD 3 does not require Codex by default");
-    expect(externalReviewers).toContain("gh pr view <PR> --comments --reviews");
+    expect(externalReviewers).toContain("gh pr view <PR> --comments --json reviews,comments,headRefOid,mergeable,state,url");
     expect(externalReviewers).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate");
     expect(externalReviewers).toContain("Codex P2 or higher is at least Polyp");
     expect(externalReviewers).toContain("[blocked] post-PR Codex review unavailable");

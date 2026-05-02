@@ -9,7 +9,7 @@ PD 3 does not require Codex by default. If a PD 3 PR explicitly requests Codex r
 After PR creation and before merge, trigger or wait for the official GitHub Codex reviewer/plugin. Then inspect both the review summary and inline review comments:
 
 ```bash
-gh pr view <PR> --comments --reviews
+gh pr view <PR> --comments --json reviews,comments,headRefOid,mergeable,state,url
 gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate
 ```
 

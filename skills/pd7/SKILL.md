@@ -123,7 +123,7 @@ Mandatory merge gate for PD 7. This gate runs after PR creation and before merge
 - Fetch both PR reviews and inline review comments:
 
 ```bash
-gh pr view <PR> --comments --reviews
+gh pr view <PR> --comments --json reviews,comments,headRefOid,mergeable,state,url
 gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate
 ```
 
@@ -148,7 +148,7 @@ gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate
 - [ ] orev 결정론적 gate 완료, clean artifact path 기록
 - [ ] PR 생성됨
 - [ ] /commit skill 또는 command invocation 증거
-- [ ] post-PR GitHub Codex gate 실행 증거 (`gh pr view --comments --reviews`, `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate`)
+- [ ] post-PR GitHub Codex gate 실행 증거 (`gh pr view --comments --json reviews,comments,headRefOid,mergeable,state,url`, `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate`)
 - [ ] Codex-reviewed commit SHA가 최신 PR head SHA와 일치하거나 gate 재실행 완료
 - [ ] Codex Cancer 0 / open Polyp 0 확인, Codex-driven tracked-file fixes는 SUX_review/executable proof/build/architecture/orev/Codex 재검증 완료
 - [ ] PR body/comment에 Codex found/fixed/open counts와 fixing commit SHA 기록

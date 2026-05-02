@@ -26,7 +26,7 @@ Operational mistakes that caused repeated PD workflow failures. Keep this file t
 
 - After PR creation and before merge, inspect official GitHub Codex reviewer/plugin output.
 - Run both:
-  - `gh pr view <PR> --comments --reviews`
+  - `gh pr view <PR> --comments --json reviews,comments,headRefOid,mergeable,state,url`
   - `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate`
 - Classify every Codex inline comment as Cancer, Polyp, or Cigarette.
 - Treat Codex P2 or higher as at least Polyp.
