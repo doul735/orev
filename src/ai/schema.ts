@@ -102,7 +102,7 @@ function parseDimension(value: unknown): AiDimensionSummary | undefined {
   };
 }
 
-function parseFinding(value: unknown): AiFinding | undefined {
+function parseFinding(value: unknown, allowLegacyPathology: boolean): AiFinding | undefined {
   if (!isRecord(value)
     || !isDimension(value.dimension)
     || !isSeverity(value.severity)
@@ -121,16 +121,26 @@ function parseFinding(value: unknown): AiFinding | undefined {
   if (value.line !== undefined && (typeof value.line !== "number" || !Number.isInteger(value.line) || value.line <= 0)) {
     return undefined;
   }
+  const pathology = isPathology(value.pathology) ? value.pathology : allowLegacyPathology ? pathologyFromSeverity(value.severity) : undefined;
+  if (pathology === undefined) {
+    return undefined;
+  }
+  const blastRadius = isString(value.blastRadius) ? value.blastRadius : allowLegacyPathology ? "Derived from legacy schema v1 severity metadata." : undefined;
+  const infectionPath = isString(value.infectionPath) ? value.infectionPath : allowLegacyPathology ? "Legacy schema v1 did not provide infection path details." : undefined;
+  const containment = isString(value.containment) ? value.containment : allowLegacyPathology ? value.recommendation : undefined;
+  if (blastRadius === undefined || infectionPath === undefined || containment === undefined) {
+    return undefined;
+  }
   const finding: AiFinding = {
     dimension: value.dimension,
     severity: value.severity,
-    pathology: isPathology(value.pathology) ? value.pathology : pathologyFromSeverity(value.severity),
+    pathology,
     title: value.title,
     evidence: value.evidence,
     recommendation: value.recommendation,
-    blastRadius: isString(value.blastRadius) ? value.blastRadius : "Derived from legacy schema v1 severity metadata.",
-    infectionPath: isString(value.infectionPath) ? value.infectionPath : "Legacy schema v1 did not provide infection path details.",
-    containment: isString(value.containment) ? value.containment : value.recommendation,
+    blastRadius,
+    infectionPath,
+    containment,
     confidence: value.confidence
   };
   if (typeof value.file === "string") {
@@ -161,7 +171,8 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
   if (!Array.isArray(parsed.findings)) {
     throw new Error("AI response findings must be an array");
   }
-  const findings = parsed.findings.map(parseFinding);
+  const allowLegacyPathology = parsed.schemaVersion === 1;
+  const findings = parsed.findings.map((finding) => parseFinding(finding, allowLegacyPathology));
   if (findings.some((finding) => finding === undefined)) {
     throw new Error("AI response contains an invalid finding");
   }
@@ -179,7 +190,7 @@ function parseCodeReview(parsed: unknown): AiReviewSuccess {
   };
 }
 
-function parseUxFinding(value: unknown): UxFinding | undefined {
+function parseUxFinding(value: unknown, allowLegacyPathology: boolean): UxFinding | undefined {
   if (!isRecord(value)
     || !isUxLens(value.lens)
     || !isUxCategory(value.category)
@@ -198,16 +209,26 @@ function parseUxFinding(value: unknown): UxFinding | undefined {
   if (value.line !== undefined && (typeof value.line !== "number" || !Number.isInteger(value.line) || value.line <= 0)) {
     return undefined;
   }
+  const pathology = isPathology(value.pathology) ? value.pathology : allowLegacyPathology ? pathologyFromUxCategory(value.category) : undefined;
+  if (pathology === undefined) {
+    return undefined;
+  }
+  const blastRadius = isString(value.blastRadius) ? value.blastRadius : allowLegacyPathology ? "Derived from legacy schema v1 UX category metadata." : undefined;
+  const infectionPath = isString(value.infectionPath) ? value.infectionPath : allowLegacyPathology ? "Legacy schema v1 did not provide infection path details." : undefined;
+  const containment = isString(value.containment) ? value.containment : allowLegacyPathology ? value.suggestion : undefined;
+  if (blastRadius === undefined || infectionPath === undefined || containment === undefined) {
+    return undefined;
+  }
   const finding: UxFinding = {
     lens: value.lens,
     category: value.category,
-    pathology: isPathology(value.pathology) ? value.pathology : pathologyFromUxCategory(value.category),
+    pathology,
     title: value.title,
     current: value.current,
     suggestion: value.suggestion,
-    blastRadius: isString(value.blastRadius) ? value.blastRadius : "Derived from legacy schema v1 UX category metadata.",
-    infectionPath: isString(value.infectionPath) ? value.infectionPath : "Legacy schema v1 did not provide infection path details.",
-    containment: isString(value.containment) ? value.containment : value.suggestion,
+    blastRadius,
+    infectionPath,
+    containment,
     confidence: value.confidence
   };
   if (typeof value.file === "string") {
@@ -229,7 +250,8 @@ function parseUxReview(parsed: unknown): UxReviewSuccess {
   if (!Array.isArray(parsed.findings)) {
     throw new Error("AI UX response findings must be an array");
   }
-  const findings = parsed.findings.map(parseUxFinding);
+  const allowLegacyPathology = parsed.schemaVersion === 1;
+  const findings = parsed.findings.map((finding) => parseUxFinding(finding, allowLegacyPathology));
   if (findings.some((finding) => finding === undefined)) {
     throw new Error("AI UX response contains an invalid finding");
   }

@@ -433,6 +433,39 @@ describe("AI review orchestration", () => {
     expect(markdown).toContain("- Polyp: 1");
   });
 
+  it("fails closed when schema v2 findings omit canonical pathology fields", async () => {
+    const repo = await createGitFixture();
+    await writeFile(path.join(repo, "app.ts"), "export const value = 55;\n");
+    const parsed = JSON.parse(successResponse()) as Record<string, unknown>;
+    const findings = parsed.findings as Array<Record<string, unknown>>;
+    delete findings[0].pathology;
+    const provider = new FakeProvider(JSON.stringify(parsed));
+
+    const { result, markdown } = await runReview({
+      target: repo,
+      out: path.join(tempRoot, "malformed-v2.md"),
+      format: "markdown",
+      maxFiles: 10,
+      maxBytes: 10000,
+      includeTests: false,
+      failOnSecrets: true,
+      verbose: false,
+      ai: {
+        enabled: true,
+        mode: "code",
+        model: "claude",
+        maxAiContextBytes: 120000,
+        maxAiOutputTokens: 3000,
+        aiTimeoutMs: 60000,
+        provider
+      }
+    });
+
+    expect(result.ai?.status).toBe("failed");
+    expect(result.ai?.review).toBeUndefined();
+    expect(markdown).toContain("AI response contains an invalid finding");
+  });
+
   it("accepts legacy schema v1 code provider responses and derives pathology fields", async () => {
     const repo = await createGitFixture();
     await writeFile(path.join(repo, "app.ts"), "export const value = 53;\n");

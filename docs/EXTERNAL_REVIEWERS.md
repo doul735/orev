@@ -24,6 +24,7 @@ done < <(git ls-files --others --exclude-standard -z) >> "$PATCH_TMP"
 PATCH_ID=$(shasum -a 256 "$PATCH_TMP" | cut -d ' ' -f 1)
 PATCH_ARTIFACT="handoff/pd-review-${PATCH_ID}.patch"
 mv "$PATCH_TMP" "$PATCH_ARTIFACT"
+test "$(shasum -a 256 "$PATCH_ARTIFACT" | cut -d ' ' -f 1)" = "$PATCH_ID"
 codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
   -o handoff/pd-review-${PATCH_ID}.md \
   --title "PD external review for <base-sha> + uncommitted patch ${PATCH_ID}" \
@@ -32,7 +33,7 @@ codex exec review --base <base-sha> --uncommitted --model gpt-5.4 --json \
 
 Keep `handoff/` ignored or store these receipts as CI artifacts, PR comments, or hosted review URLs. Review receipts and the matching `${PATCH_ARTIFACT}` are durable release evidence, but they are not part of the reviewed source diff.
 
-If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted` and preserve the `${PATCH_ARTIFACT}` file that covers staged, unstaged, and newly added files.
+If the final diff is already committed, use the immutable head SHA in the title and verify the receipt covers `<base-sha>...<head-sha>`. If the final diff is still pre-commit, keep `--uncommitted`, preserve the `${PATCH_ARTIFACT}` file that covers staged, unstaged, and newly added files, and do not edit files between generating `${PATCH_ARTIFACT}` and running Codex. If any tracked or untracked source file changes after `${PATCH_ARTIFACT}` is generated, discard the receipt and regenerate the patch artifact before rerunning the reviewer.
 
 The receipt must include or preserve:
 
