@@ -85,6 +85,15 @@ describe("public package documentation", () => {
     expect(pkg.files).toContain("docs/GOTCHAS.md");
   });
 
+  it("keeps launch copy aligned with the post-PR Codex gate", async () => {
+    const launchCopy = await readProjectFile("docs/LAUNCH_COPY.md");
+
+    expect(launchCopy).toContain("PD 5 is for feature work that needs tests, build, and post-PR GitHub Codex approval");
+    expect(launchCopy).toContain("PD 5는 테스트, 빌드, post-PR GitHub Codex 승인이 필요한 기능 작업");
+    expect(launchCopy).not.toContain("independent reviewer");
+    expect(launchCopy).not.toContain("독립 reviewer");
+  });
+
   it("documents the mandatory post-PR GitHub Codex gate for PD5 and PD7", async () => {
     const externalReviewers = await readProjectFile("docs/EXTERNAL_REVIEWERS.md");
     const pd3 = await readProjectFile("skills/pd3/SKILL.md");
