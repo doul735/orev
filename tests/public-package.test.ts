@@ -82,13 +82,22 @@ describe("public package documentation", () => {
 
     expect(pkg.files).toContain("docs/LAUNCH_COPY.md");
     expect(pkg.files).toContain("docs/EXTERNAL_REVIEWERS.md");
+    expect(pkg.files).toContain("docs/GOTCHAS.md");
   });
 
-  it("documents a usable external reviewer setup path for PD5 and PD7", async () => {
+  it("documents the mandatory post-PR GitHub Codex gate for PD5 and PD7", async () => {
     const externalReviewers = await readProjectFile("docs/EXTERNAL_REVIEWERS.md");
+    const pd3 = await readProjectFile("skills/pd3/SKILL.md");
     const pd5 = await readProjectFile("skills/pd5/SKILL.md");
     const pd7 = await readProjectFile("skills/pd7/SKILL.md");
 
+    expect(externalReviewers).toContain("PD 5 and PD 7 require an official post-PR GitHub Codex reviewer/plugin merge gate");
+    expect(externalReviewers).toContain("PD 3 does not require Codex by default");
+    expect(externalReviewers).toContain("gh pr view <PR> --comments --reviews");
+    expect(externalReviewers).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments");
+    expect(externalReviewers).toContain("Codex P2 or higher is at least Polyp");
+    expect(externalReviewers).toContain("[blocked] post-PR Codex review unavailable");
+    expect(externalReviewers).toContain("Do not downgrade to Claude Code self-review");
     expect(externalReviewers).toContain("OpenAI Codex CLI");
     expect(externalReviewers).toContain("record the base SHA");
     expect(externalReviewers).toContain("If the repository has no `HEAD` yet");
@@ -107,6 +116,16 @@ describe("public package documentation", () => {
     expect(externalReviewers).toContain("durable artifact path");
     expect(pd5).toContain("docs/EXTERNAL_REVIEWERS.md");
     expect(pd7).toContain("docs/EXTERNAL_REVIEWERS.md");
+    expect(pd5).toContain("Post-PR GitHub Codex Merge Gate");
+    expect(pd7).toContain("Post-PR GitHub Codex Merge Gate");
+    expect(pd5).toContain("official GitHub Codex reviewer/plugin/connector");
+    expect(pd7).toContain("official GitHub Codex reviewer/plugin/connector");
+    expect(pd5).toContain("Codex P2 or higher as at least Polyp");
+    expect(pd7).toContain("Codex P2 or higher as at least Polyp");
+    expect(pd5).toContain("[blocked] post-PR Codex review unavailable");
+    expect(pd7).toContain("[blocked] post-PR Codex review unavailable");
+    expect(pd3).not.toContain("Post-PR GitHub Codex Merge Gate");
+    expect(pd3).not.toContain("post-PR Codex review unavailable");
   });
 
   it("keeps packaged docs aligned with the PD 9 reserved-slot contract", async () => {
@@ -131,23 +150,23 @@ describe("public package documentation", () => {
     }
   });
 
-  it("keeps PD5 and PD7 independent-review approval explicit", async () => {
+  it("keeps PD5 and PD7 post-PR Codex approval explicit", async () => {
     const pd5 = await readProjectFile("skills/pd5/SKILL.md");
     const pd7 = await readProjectFile("skills/pd7/SKILL.md");
     const architecture = await readProjectFile("docs/ARCHITECTURE.md");
 
     for (const content of [pd5, pd7]) {
-      expect(content).toContain("independent reviewer");
+      expect(content).toContain("Post-PR GitHub Codex Merge Gate");
       expect(content).toContain("do not count as release approval");
-      expect(content).toContain("cross-model review unavailable");
-      expect(content).toContain("independent reviewer Cancer and Polyp counts are 0");
-      expect(content).toContain("If the independent reviewer reports Cigarette-only findings");
+      expect(content).toContain("post-PR Codex review unavailable");
+      expect(content).toContain("open Codex Cancer and Polyp counts are 0");
+      expect(content).toContain("If Codex reports Cigarette-only findings");
       expect(content).toContain("tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact");
-      expect(content).toContain("reviewer-driven tracked-file fixes는 SUX_review");
-      expect(content).toContain("after 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp");
+      expect(content).toContain("Codex-driven tracked-file fixes는 SUX_review");
+      expect(content).toContain("After 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp");
     }
 
-    expect(architecture).toContain("`pd5`: SUX_review + independent reviewer + tests + build + orev review");
+    expect(architecture).toContain("`pd5`: SUX_review + tests + build + orev review + post-PR GitHub Codex gate");
   });
 
   it("hard-stops PD5 when Cancer findings remain", async () => {
@@ -167,10 +186,10 @@ describe("public package documentation", () => {
     expect(pd5).toContain("mandatory escalation");
     expect(pd5).toContain("PD 5 테스트/빌드/커밋/PR 단계로 진행하지 않는다");
     expect(pd5).toContain("Cancer-class issue를 수정한 뒤에도 PD 5로 재개하지 말고 PD 7에서 재검증한다");
-    expect(pd5).toContain("If the independent reviewer reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7");
+    expect(pd5).toContain("If Codex reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7");
     expect(pd5).toContain("Do not continue under PD 5 after fixing a Cancer-class issue");
     expect(pd5).toContain("Polyp 발견 → 현재 패스에서 수정");
-    expect(pd5).toContain("Polyp 0건이 될 때까지 independent reviewer, tests, build, commit, PR 단계로 진행하지 않는다");
+    expect(pd5).toContain("Polyp 0건이 될 때까지 tests, build, commit, PR, post-PR GitHub Codex 단계로 진행하지 않는다");
     expect(pd5).toContain("code-review: Cancer 0");
     expect(pd5).toContain("ux-review: Cancer 0");
     expect(tiers).toContain("Any Cancer finding hard-stops PD 5");
@@ -200,17 +219,28 @@ describe("public package documentation", () => {
     expect(strategy).toContain("applicable E2E/equivalent proof");
   });
 
-  it("keeps the PD5 and PD7 independent reviewer gate before commit and PR", async () => {
+  it("keeps the PD5 and PD7 GitHub Codex gate after PR and before merge", async () => {
     const roadmap = await readProjectFile("docs/MIGRATION_ROADMAP.md");
 
-    const reviewerIndex = roadmap.indexOf("mandatory independent adversarial review for PD 5/7");
     const commitIndex = roadmap.indexOf("commit/PR");
+    const reviewerIndex = roadmap.indexOf("mandatory post-PR GitHub Codex review for PD 5/7 before merge");
 
     expect(reviewerIndex).toBeGreaterThan(-1);
     expect(commitIndex).toBeGreaterThan(-1);
-    expect(reviewerIndex).toBeLessThan(commitIndex);
-    expect(roadmap).toContain("not a PD 5 or PD 7 release-approval fallback");
+    expect(commitIndex).toBeLessThan(reviewerIndex);
+    expect(roadmap).toContain("not PD 5 or PD 7 post-PR merge-gate fallbacks");
     expect(roadmap).toContain("docs/EXTERNAL_REVIEWERS.md");
+  });
+
+  it("documents PD gotchas that caused repeated release-gate mistakes", async () => {
+    const gotchas = await readProjectFile("docs/GOTCHAS.md");
+
+    expect(gotchas).toContain("PD5 Cancer Is A Hard Stop");
+    expect(gotchas).toContain("Fixing the Cancer finding does not allow PD 5 to resume");
+    expect(gotchas).toContain("Polyp Is Not Cigarette");
+    expect(gotchas).toContain("The post-PR GitHub Codex merge gate is mandatory for PD 5 and PD 7 only");
+    expect(gotchas).toContain("PD 3 does not require Codex by default");
+    expect(gotchas).toContain("gh api repos/<owner>/<repo>/pulls/<PR>/comments");
   });
 
   it("presents both install and adapt adoption paths", async () => {

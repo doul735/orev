@@ -1,6 +1,6 @@
 ---
 name: pd5
-description: PD 5, 중규모 변경 출하. SUX_review + independent reviewer gate + 실행형 테스트 + 빌드 + orev 결정론적 artifact gate.
+description: PD 5, 중규모 변경 출하. SUX_review + 실행형 테스트 + 빌드 + orev 결정론적 artifact gate + post-PR GitHub Codex merge gate.
 user-invocable: true
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 argument-hint: "[선택: 커밋 메시지 힌트]"
@@ -39,7 +39,7 @@ orev privacy gate . --verbose
 - 모든 finding에 Cigarette/Polyp/Cancer 분류
 - legacy: MUST-FIX / SHOULD-FIX / NIT, Quick Win / Major / Nice-to-have 메타데이터는 보조 정보로만 남긴다.
 - Cancer 발견 → 즉시 중단. PD 7로 mandatory escalation을 기록하고, PD 5 테스트/빌드/커밋/PR 단계로 진행하지 않는다. Cancer-class issue를 수정한 뒤에도 PD 5로 재개하지 말고 PD 7에서 재검증한다.
-- Polyp 발견 → 현재 패스에서 수정하고, Polyp 0건이 될 때까지 independent reviewer, tests, build, commit, PR 단계로 진행하지 않는다.
+- Polyp 발견 → 현재 패스에서 수정하고, Polyp 0건이 될 때까지 tests, build, commit, PR, post-PR GitHub Codex 단계로 진행하지 않는다.
 - Cigarette 발견은 현재 패스에서 수정하고, 보고서에 cycle evidence, counts, cleanup attempt, remaining items, zero Cancer / Polyp confirmation을 남긴다.
 
 ### Step 3: 실행형 테스트
@@ -58,7 +58,7 @@ pnpm run build
 ### Step 5: orev 결정론적 artifact gate (커밋 전)
 
 **반드시 커밋 전에 실행**. 커밋 후에는 diff가 비어서 리뷰 불가.
-이 단계는 semantic approval가 아니다. semantic review는 Step 6의 independent reviewer gate가 담당한다.
+이 단계는 semantic approval가 아니다. semantic review는 Step 7의 post-PR GitHub Codex merge gate가 담당한다.
 
 ```bash
 TMP_DIR=$(mktemp -d /tmp/orev-pd5-review.XXXXXX)
@@ -69,26 +69,31 @@ deterministic 결과만 본다. secret, privacy, context, report issue가 있으
 
 orev 실패 시 중단하고 실패 원인을 보고한다. 직접 same-agent 분석은 참고 자료일 뿐, deterministic artifact gate를 대체하지 않는다.
 
-### Step 6: Independent Reviewer Gate (final immutable diff)
-
-Mandatory release gate. The implementing agent must not be the final semantic reviewer.
-
-- Run this gate only after SUX fixes, executable tests, build, and clean `orev review` artifact generation have completed without requiring more tracked-file changes.
-- Freeze the exact reviewed diff before invoking the reviewer. Record the base SHA/ref, head SHA or current worktree snapshot, changed-files basis, and artifact paths.
-- Run semantic review with an independent reviewer model or hosted review runtime.
-- Default supported setup path: `docs/EXTERNAL_REVIEWERS.md`, using `codex exec review --base <base> --uncommitted --model <model> --json -o <receipt.md>` for the normal pre-commit gate or an equivalent hosted reviewer receipt.
-- Use privacy-gated `orev` artifacts and selected source context as input.
-- Local self-review, direct same-agent analysis, and deterministic `orev review` output are supporting evidence only; they do not count as release approval.
-- If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
-- Report reviewer identity, invocation evidence, reviewed artifacts, immutable diff scope, and Cancer/Polyp/Cigarette counts.
-- If the independent reviewer reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7. Do not continue under PD 5 after fixing a Cancer-class issue.
-- If the independent reviewer reports Polyp findings, stop before commit or PR, fix the findings, rerun SUX_review, tests/build/orev as applicable, and rerun the independent reviewer gate against the updated final diff. PD 5 may proceed only when independent reviewer Cancer and Polyp counts are 0.
-- If the independent reviewer reports Cigarette-only findings, fix them in the current pass, rerun tests/build/orev as applicable, and rerun this gate unless the finding required no tracked-file change. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before reviewer rerun. Count these as Cigarette-only review/fix cycles; after 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp, stop the loop and report remaining Cigarette risk instead of blocking release indefinitely.
-- Any tracked-file change after reviewer approval invalidates the receipt. Rerun this gate against the updated final diff before continuing.
-
-### Step 7: Commit & PR
+### Step 6: Commit & PR
 
 - `/commit` 스킬을 runtime의 공식 skill/command invocation mechanism으로 실행한다.
+
+### Step 7: Post-PR GitHub Codex Merge Gate
+
+Mandatory merge gate for PD 5. This gate runs after PR creation and before merge.
+
+- Setup and evidence requirements are documented in `docs/EXTERNAL_REVIEWERS.md`.
+- Use the official GitHub Codex reviewer/plugin/connector on the PR. Claude Code self-review, SUX_review, Codex CLI preflight, another local model, and deterministic `orev review` are supporting evidence only; they do not replace this post-PR GitHub Codex gate.
+- Claude Code self-review, direct same-agent analysis, Codex CLI preflight, and deterministic `orev review` output do not count as release approval.
+- Confirm the latest PR head SHA and Codex-reviewed commit SHA. If the PR head changed after Codex review, rerun or retrigger Codex before merge.
+- Fetch both PR reviews and inline review comments:
+
+```bash
+gh pr view <PR> --comments --reviews
+gh api repos/<owner>/<repo>/pulls/<PR>/comments
+```
+
+- Classify every GitHub Codex inline comment as Cancer, Polyp, or Cigarette. Treat Codex P2 or higher as at least Polyp.
+- If Codex reports any Cancer finding, stop PD 5 and mandatory-escalate to PD 7. Do not continue under PD 5 after fixing a Cancer-class issue.
+- If Codex reports Polyp findings, fix them, push a new commit, rerun SUX_review, tests/build/orev as applicable, and rerun or retrigger this post-PR Codex gate. PD 5 may merge only when open Codex Cancer and Polyp counts are 0.
+- If Codex reports Cigarette-only findings, fix them in the current pass when practical. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before the Codex gate is accepted. After 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp, stop the loop and report remaining Cigarette risk instead of blocking release indefinitely.
+- Record found/fixed/open counts and the fixing commit SHA in the PR body or PR comment before merge.
+- If GitHub Codex is unavailable, not installed, or cannot be inspected, stop with `[blocked] post-PR Codex review unavailable`. Do not downgrade to self-review.
 
 ### 디버깅
 
@@ -102,12 +107,12 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - [ ] 테스트 전체 통과
 - [ ] 빌드 성공
 - [ ] orev 결정론적 gate 완료, clean artifact path 기록
-- [ ] independent reviewer gate가 최종 immutable diff 기준으로 통과, self-review가 approval로 계산되지 않았다는 증거
-- [ ] reviewer receipt에 base/head 또는 snapshot, changed-files basis, artifact path 기록
-- [ ] independent reviewer Cancer 0 / Polyp 0 확인, reviewer-driven tracked-file fixes는 SUX_review/tests/build/orev/reviewer 재검증 완료
-- [ ] reviewer approval 이후 tracked-file change 없음 또는 gate 재실행 완료
 - [ ] /commit skill 또는 command invocation 증거
 - [ ] PR 생성됨
+- [ ] post-PR GitHub Codex gate 실행 증거 (`gh pr view --comments --reviews`, `gh api repos/<owner>/<repo>/pulls/<PR>/comments`)
+- [ ] Codex-reviewed commit SHA가 최신 PR head SHA와 일치하거나 gate 재실행 완료
+- [ ] Codex Cancer 0 / open Polyp 0 확인, Codex-driven tracked-file fixes는 SUX_review/tests/build/orev/Codex 재검증 완료
+- [ ] PR body/comment에 Codex found/fixed/open counts와 fixing commit SHA 기록
 
 ## 보고서
 
@@ -121,7 +126,7 @@ PD 5 완료!
 3. 테스트: N개 통과 (Ns)
 4. 빌드: 통과
 5. orev 결정론적 gate: [클린 artifact path|issue 수정|에스컬레이션]
-6. Independent reviewer gate: [reviewer/runtime, invocation evidence, immutable diff scope, orev artifact path, result]
-7. 커밋: /commit skill 또는 command invocation, <해시> <메시지>
-8. PR: <URL>
+6. 커밋: /commit skill 또는 command invocation, <해시> <메시지>
+7. PR: <URL>
+8. Post-PR GitHub Codex gate: [reviewed head SHA, inline comment counts, found/fixed/open, fixing commits, result]
 ```
