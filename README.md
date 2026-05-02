@@ -123,7 +123,7 @@ For PD 5 and PD 7, the official GitHub Codex reviewer/plugin is a mandatory post
 1. `orev` creates privacy-gated local artifacts before commit.
 2. The PR is created from the verified branch.
 3. GitHub Codex reviews the PR after creation.
-4. The skill suite checks `gh pr view --comments --reviews` and `gh api repos/<owner>/<repo>/pulls/<PR>/comments` before merge.
+4. The skill suite checks `gh pr view --comments --reviews` and `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate` before merge.
 5. Codex P2 or higher is at least Polyp; open Polyp or Cancer blocks merge.
 
 PD 3 does not require Codex by default. Self-review by the implementing agent, direct same-agent fallback, Codex CLI preflight, and deterministic `orev review` output are supporting evidence only. They do not count as the PD 5/7 post-PR Codex gate.
