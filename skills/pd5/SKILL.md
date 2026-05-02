@@ -76,7 +76,7 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - Run this gate only after SUX fixes, executable tests, build, and clean `orev review` artifact generation have completed without requiring more tracked-file changes.
 - Freeze the exact reviewed diff before invoking the reviewer. Record the base SHA/ref, head SHA or current worktree snapshot, changed-files basis, and artifact paths.
 - Run semantic review with an independent reviewer model or hosted review runtime.
-- Default supported setup path: `docs/EXTERNAL_REVIEWERS.md`, using `codex exec review --base <base> --model <model> --json -o <receipt.md>` or an equivalent hosted reviewer receipt.
+- Default supported setup path: `docs/EXTERNAL_REVIEWERS.md`, using `codex exec review --base <base> --uncommitted --model <model> --json -o <receipt.md>` for the normal pre-commit gate or an equivalent hosted reviewer receipt.
 - Use privacy-gated `orev` artifacts and selected source context as input.
 - Local self-review, direct same-agent analysis, and deterministic `orev review` output are supporting evidence only; they do not count as release approval.
 - If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
