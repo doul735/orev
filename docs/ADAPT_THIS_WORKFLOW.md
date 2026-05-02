@@ -53,7 +53,7 @@ Your auth/payment/data/security     -> PD 7
 
 ## Do Not Preserve Blindly
 
-- The exact hosted runtime can change, but PD 5/7 should keep independent reviewer approval rather than same-agent self-review.
+- PD 5/7 should keep a post-PR GitHub Codex merge gate rather than same-agent self-review. If you adapt the workflow without GitHub Codex, document the organizational replacement explicitly instead of silently downgrading.
 - The exact skill names can change.
 - The exact test/build commands should match your project.
 - The pathology labels are memorable, but every finding still needs concrete evidence.

@@ -26,7 +26,7 @@ AI coding agents make code changes fast. Release discipline still has to be deli
 - review code and UX separately
 - classify findings by spread risk using the canonical pathology taxonomy: Cancer, Polyp, Cigarette
 - fix Cigarette findings in the current pass, and stop only after 3 consecutive Cigarette-only review/fix cycles with documented evidence
-- require independent reviewer approval for PD 5 and PD 7; self-review by the implementing agent does not count
+- require post-PR GitHub Codex approval for PD 5 and PD 7; self-review by the implementing agent does not count
 - choose a PD tier based on change risk
 - verify with tests/build before release
 
@@ -80,8 +80,8 @@ The CLI prepares safe local artifacts. The skills orchestrate review, fixes, tes
 |---|---|---|
 | PD 1 | docs, config, one-liners, current-pass Cigarette cleanup | privacy gate |
 | PD 3 | normal feature or bug fix | code review + type check |
-| PD 5 | medium feature work | SUX review + independent reviewer + tests + build |
-| PD 7 | large, high-confidence, auth/payment/security/data release | full verification + independent reviewer + applicable E2E/equivalent proof + architecture + Cancer-zero |
+| PD 5 | medium feature work | SUX review + tests + build + post-PR GitHub Codex gate |
+| PD 7 | large, high-confidence, auth/payment/security/data release | full verification + post-PR GitHub Codex gate + applicable E2E/equivalent proof + architecture + Cancer-zero |
 | PD 9 | reserved slot | custom community or organization variant |
 
 Even-numbered tiers, PD 2/4/6/8, are open slots for community variants.
@@ -105,7 +105,7 @@ Install or adapt the skill files under `skills/` into your agent runtime.
 ```text
 /pd1          # docs, config, one-liner
 /pd3          # normal feature/bug fix
-/pd5          # medium scope, independent reviewer + tests + build
+/pd5          # medium scope, tests + build + post-PR GitHub Codex gate
 /pd7          # large/auth/payment/data/security, full verification
 /pd9          # reserved custom variant slot
 
@@ -116,18 +116,19 @@ Install or adapt the skill files under `skills/` into your agent runtime.
 
 Deprecated `ship` and `ship7` templates are kept under `skills/_deprecated/` for migration reference only.
 
-## Independent Review
+## Post-PR Codex Merge Gate
 
-For PD 5 and PD 7, an independent reviewer model or hosted review runtime must consume `orev` artifacts for adversarial review:
+For PD 5 and PD 7, the official GitHub Codex reviewer/plugin is a mandatory post-PR merge gate:
 
-1. `orev` creates privacy-gated local artifacts.
-2. The hosted review runtime reads those artifacts and selected source files.
-3. A stronger review model performs adversarial review through that runtime.
-4. The skill suite verifies findings, applies selected fixes, and runs tests/build before release.
+1. `orev` creates privacy-gated local artifacts before commit.
+2. The PR is created from the verified branch.
+3. GitHub Codex reviews the PR after creation.
+4. The skill suite checks `gh pr view --comments --json reviews,comments,headRefOid,mergeable,state,url` and `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate` before merge.
+5. Codex P2 or higher is at least Polyp; open Polyp or Cancer blocks merge.
 
-Self-review by the implementing agent, direct same-agent fallback, and deterministic `orev review` output are supporting evidence only. They do not count as PD 5/7 release approval.
+PD 3 does not require Codex by default. Self-review by the implementing agent, direct same-agent fallback, Codex CLI preflight, and deterministic `orev review` output are supporting evidence only. They do not count as the PD 5/7 post-PR Codex gate.
 
-See [External Reviewer Setup](./docs/EXTERNAL_REVIEWERS.md) for the supported Codex CLI receipt path and required evidence.
+See [External Reviewer Setup](./docs/EXTERNAL_REVIEWERS.md) for the required post-PR Codex evidence and supporting Codex CLI preflight path.
 
 ## CLI Reference
 

@@ -1,6 +1,6 @@
 ---
 name: pd7
-description: PD 7, 최고 출하 검증. save-context + SUX_review + independent reviewer gate + tests/build/applicable E2E + architecture check + orev deterministic artifact gate.
+description: PD 7, 최고 출하 검증. save-context + SUX_review + tests/build/applicable E2E + architecture check + orev deterministic artifact gate + post-PR GitHub Codex merge gate.
 user-invocable: true
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 argument-hint: "[선택: 커밋 메시지 힌트]"
@@ -98,7 +98,7 @@ E2E는 사용자 여정, UI, browser-visible flow, auth/payment/data/security �
 ### Step 6: orev 결정론적 artifact gate (커밋 전)
 
 **반드시 커밋 전에 실행**. 커밋 후에는 diff가 비어서 리뷰 불가.
-이 단계는 semantic approval가 아니다. semantic review는 Step 7의 independent reviewer gate가 담당한다.
+이 단계는 semantic approval가 아니다. semantic review는 Step 8의 post-PR GitHub Codex merge gate가 담당한다.
 
 ```bash
 TMP_DIR=$(mktemp -d /tmp/orev-pd7-review.XXXXXX)
@@ -108,25 +108,32 @@ orev review . --out "$TMP_DIR/pd7-review.md" --verbose
 deterministic 결과만 확인한다. secret, privacy, context, report issue가 있으면 수정하고 executable proof/build/architecture/orev를 다시 실행한다.
 orev 실패 시 중단하고 실패 원인을 보고한다. 직접 same-agent 분석은 참고 자료일 뿐, deterministic artifact gate를 대체하지 않는다.
 
-### Step 7: Independent Reviewer Gate (final immutable diff)
-
-Mandatory release gate. The implementing agent must not be the final semantic reviewer.
-
-- Run this gate only after SUX fixes, executable proof, build, applicable E2E or equivalent coverage, architecture follow-ups, and clean `orev review` artifact generation have completed without requiring more tracked-file changes.
-- Freeze the exact reviewed diff before invoking the reviewer. Record the base SHA/ref, head SHA or current worktree snapshot, changed-files basis, and artifact paths.
-- Run semantic review with an independent reviewer model or hosted review runtime.
-- Default supported setup path: `docs/EXTERNAL_REVIEWERS.md`, using `codex exec review --base <base> --uncommitted --model <model> --json -o <receipt.md>` for the normal pre-commit gate or an equivalent hosted reviewer receipt.
-- Use privacy-gated `orev` artifacts and selected source context as input.
-- Local self-review, direct same-agent analysis, and deterministic `orev review` output are supporting evidence only; they do not count as release approval.
-- If the independent reviewer is unavailable or fails, stop with `[blocked] cross-model review unavailable`.
-- Report reviewer identity, invocation evidence, reviewed artifacts, immutable diff scope, and Cancer/Polyp/Cigarette counts.
-- If the independent reviewer reports Cancer or Polyp findings, stop before commit or PR, fix the findings, rerun SUX_review, executable proof/build/architecture/orev checks as applicable, and rerun the independent reviewer gate against the updated final diff. PD 7 may proceed only when independent reviewer Cancer and Polyp counts are 0.
-- If the independent reviewer reports Cigarette-only findings, fix them in the current pass, rerun executable proof/build/architecture/orev checks as applicable, and rerun this gate unless the finding required no tracked-file change. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before reviewer rerun. Count these as Cigarette-only review/fix cycles; after 3 consecutive Cigarette-only cycles with documented cleanup evidence and zero Cancer/Polyp, stop the loop and report remaining Cigarette risk instead of blocking release indefinitely.
-- Any tracked-file change after reviewer approval invalidates the receipt. Rerun this gate against the updated final diff before continuing.
-
-### Step 8: Commit & PR
+### Step 7: Commit & PR
 
 - `/commit` 스킬을 runtime의 공식 skill/command invocation mechanism으로 실행한다.
+
+### Step 8: Post-PR GitHub Codex Merge Gate
+
+Mandatory merge gate for PD 7. This gate runs after PR creation and before merge.
+
+- Setup and evidence requirements are documented in `docs/EXTERNAL_REVIEWERS.md`.
+- Use the official GitHub Codex reviewer/plugin/connector on the PR. Claude Code self-review, SUX_review, Codex CLI preflight, another local model, architecture notes, and deterministic `orev review` are supporting evidence only; they do not replace this post-PR GitHub Codex gate.
+- Claude Code self-review, direct same-agent analysis, Codex CLI preflight, and deterministic `orev review` output do not count as release approval.
+- Confirm the latest PR head SHA and Codex-reviewed commit SHA. If the PR head changed after Codex review, rerun or retrigger Codex before merge.
+- Fetch both PR reviews and inline review comments:
+
+```bash
+gh pr view <PR> --comments --json reviews,comments,headRefOid,mergeable,state,url
+gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate
+```
+
+- Classify every GitHub Codex inline comment as Cancer, Polyp, or Cigarette. Treat Codex P2 or higher as at least Polyp.
+- PD 7 may merge only when open Codex Cancer and Polyp counts are 0, and all SUX/Codex Cancer counts are 0.
+- If Codex reports Cancer or Polyp findings, fix them, push a new commit, rerun SUX_review, executable proof/build/architecture/orev checks as applicable, and rerun or retrigger this post-PR Codex gate against the updated PR head.
+- If Codex reports Cigarette-only findings, fix them in the current pass. Any tracked-file Cigarette fix invalidates the prior SUX_review counts and deterministic `orev review` artifact, requiring fresh SUX_review evidence and a fresh clean orev artifact before the Codex gate is accepted.
+- Codex review loops are bounded: run up to 3 review/fix cycles by default; if the first 3 cycles are Cigarette-only, stop after documenting cleanup attempts, remaining Cigarette risk, and zero open Cancer/Polyp; if cycle 3 reports any Polyp or Cancer, allow exactly 1 extra cycle after fixes; if cycle 4 still reports Polyp or Cancer, block release and require a human decision.
+- Record found/fixed/open counts and the fixing commit SHA in the PR body or PR comment before merge.
+- If GitHub Codex is unavailable, not installed, or cannot be inspected, stop with `[blocked] post-PR Codex review unavailable`. Do not downgrade to self-review.
 
 ### Verification
 
@@ -139,12 +146,12 @@ Mandatory release gate. The implementing agent must not be the final semantic re
 - [ ] applicable E2E 통과 또는 equivalent executable coverage 증거 기록
 - [ ] 아키텍처 점검 완료
 - [ ] orev 결정론적 gate 완료, clean artifact path 기록
-- [ ] independent reviewer gate가 최종 immutable diff 기준으로 통과, self-review가 approval로 계산되지 않았다는 증거
-- [ ] reviewer receipt에 base/head 또는 snapshot, changed-files basis, artifact path 기록
-- [ ] independent reviewer Cancer 0 / Polyp 0 확인, reviewer-driven tracked-file fixes는 SUX_review/executable proof/build/architecture/orev/reviewer 재검증 완료
-- [ ] reviewer approval 이후 tracked-file change 없음 또는 gate 재실행 완료
 - [ ] PR 생성됨
 - [ ] /commit skill 또는 command invocation 증거
+- [ ] post-PR GitHub Codex gate 실행 증거 (`gh pr view --comments --json reviews,comments,headRefOid,mergeable,state,url`, `gh api repos/<owner>/<repo>/pulls/<PR>/comments --paginate`)
+- [ ] Codex-reviewed commit SHA가 최신 PR head SHA와 일치하거나 gate 재실행 완료
+- [ ] Codex Cancer 0 / open Polyp 0 확인, Codex-driven tracked-file fixes는 SUX_review/executable proof/build/architecture/orev/Codex 재검증 완료
+- [ ] PR body/comment에 Codex found/fixed/open counts와 fixing commit SHA 기록
 
 ## 보고서
 
@@ -161,15 +168,15 @@ PD 7 완료!
 6. E2E / equivalent executable proof: [통과|해당 없음 + 대체 증거]
 7. 아키텍처: [영향 없음|영향 보고됨]
 8. orev 결정론적 gate: [클린 artifact path|issue 수정|에스컬레이션]
-9. Independent reviewer gate: [reviewer/runtime, invocation evidence, immutable diff scope, orev artifact path, result]
-10. 커밋: /commit skill 또는 command invocation, <해시> <메시지>
-11. PR: <URL>
+9. 커밋: /commit skill 또는 command invocation, <해시> <메시지>
+10. PR: <URL>
+11. Post-PR GitHub Codex gate: [reviewed head SHA, inline comment counts, found/fixed/open, fixing commits, result]
 ```
 
 ## 중단 조건
 
 - Privacy Gate BLOCKED → 즉시 중단
-- independent reviewer gate 미실행/실패 → 중단
+- post-PR GitHub Codex gate 미실행/실패 → 중단
 - Cancer 발견 후 수정 불가 → 중단 + 에스컬레이션
 - Cancer 0건 미달 → 머지 차단
 - 테스트/빌드/applicable E2E 또는 equivalent executable coverage 2회 실패 → 중단
