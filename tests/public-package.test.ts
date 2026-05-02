@@ -91,8 +91,14 @@ describe("public package documentation", () => {
 
     expect(externalReviewers).toContain("OpenAI Codex CLI");
     expect(externalReviewers).toContain("record the base SHA");
+    expect(externalReviewers).toContain("If the repository has no `HEAD` yet");
     expect(externalReviewers).toContain("PATCH_TMP=$(mktemp /tmp/orev-pd-review.XXXXXX)");
+    expect(externalReviewers).toContain("hash_file() {");
+    expect(externalReviewers).toContain("sha256sum \"$1\"");
+    expect(externalReviewers).toContain("shasum -a 256 \"$1\"");
     expect(externalReviewers).toContain("git diff --binary <base-sha> > \"$PATCH_TMP\"");
+    expect(externalReviewers).toContain("git diff --binary --cached > \"$PATCH_TMP\"");
+    expect(externalReviewers).toContain("For a no-HEAD repository, omit `--base <base-sha>`");
     expect(externalReviewers).toContain("final worktree snapshot against `<base-sha>`");
     expect(externalReviewers).toContain("PATCH_ARTIFACT=\"handoff/pd-review-${PATCH_ID}.patch\"");
     expect(externalReviewers).toContain("do not edit files between generating `${PATCH_ARTIFACT}` and running Codex");
